@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>PLS 回歸 — 從 NIR 光譜預測脂肪</title>
+<script>window.onerror=function(m,s,l){console.error("ERR:",m,"line",l);return false;};</script>
+<style>
+  @font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');font-weight:500;font-display:block;}
+  @font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');font-weight:700;font-display:block;}
+  @font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');font-weight:900;font-display:block;}
+  :root{--paper:#FAF7EE;--card:#F2EDDC;--ink:#1A1A1A;--teal:#0E7C7B;--coral:#E36414;--gold:#C8941F;
+    --fs-hero:clamp(80px,7vw,160px);--fs-title:clamp(48px,4.8vw,86px);--fs-sub:clamp(32px,3.4vw,60px);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{width:100%;height:100%;background:var(--ink);color:var(--ink);font-family:'GenSeki',sans-serif;overflow:hidden;user-select:none;}
+  .stage{position:fixed;inset:0;}
+  .slide{position:absolute;inset:0;opacity:0;padding:56px 80px 120px;background:var(--paper);display:flex;flex-direction:column;align-items:flex-start;transition:opacity .6s ease-in-out;pointer-events:none;z-index:1;}
+  .slide.active{opacity:1;z-index:2;} .slide.l5{background:var(--ink);color:var(--paper);align-items:center;justify-content:center;text-align:center;}
+  .slide-title{font-weight:900;font-size:var(--fs-title);color:var(--ink);line-height:1.1;border-left:12px solid var(--teal);padding-left:24px;margin-bottom:10px;}
+  .chapter-chip{position:absolute;top:30px;left:32px;font-size:16px;font-weight:700;color:rgba(26,26,26,.55);z-index:5;}
+  .chapter-chip span{background:var(--teal);color:var(--paper);padding:3px 10px;border-radius:4px;font-weight:900;margin-right:6px;}
+  .slide.l5 .chapter-chip{color:rgba(250,247,238,.45);}
+  .progress-bar{position:absolute;left:0;bottom:0;height:6px;background:linear-gradient(90deg,var(--teal),var(--gold));width:0%;transition:width .1s linear;z-index:99;}
+  .subtitle-container{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:88%;max-width:1560px;padding:11px 26px;border-radius:10px;background:rgba(26,26,26,.92);color:#fff;font-weight:700;font-size:30px;line-height:1.35;text-align:center;z-index:90;}
+  .content-area{width:100%;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}
+  .fig-wrap{width:100%;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}
+  .fig-wrap img{max-width:94%;max-height:70vh;border-radius:14px;background:#fff;box-shadow:0 12px 32px rgba(0,0,0,.12);transform:scale(.985);opacity:0;transition:opacity .7s ease,transform .7s ease;}
+  .slide.active .fig-wrap img{opacity:1;transform:scale(1);} .slide.pop .fig-wrap img{transform:scale(1.012);}
+  .lr-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;width:100%;flex:1;align-items:center;min-height:0;}
+  .lr-grid.img-text{grid-template-columns:1.15fr .85fr;}
+  .lr-grid img{max-width:100%;max-height:66vh;border-radius:14px;background:#fff;box-shadow:0 10px 28px rgba(0,0,0,.12);justify-self:center;}
+  .lr-col{display:flex;flex-direction:column;justify-content:center;gap:16px;}
+  .lr-col h2{font-size:var(--fs-sub);font-weight:900;line-height:1.25;} .lr-col p.note{font-size:27px;color:#55493a;line-height:1.45;font-weight:500;}
+  .lr-box{background:var(--card);border-radius:18px;padding:28px 32px;border-left:8px solid var(--teal);}
+  .lr-box.coral{border-color:var(--coral);} .lr-box h3{font-size:36px;font-weight:900;margin-bottom:8px;} .lr-box p{font-size:25px;font-weight:500;color:#4a4034;line-height:1.4;}
+  .cards{display:grid;gap:22px;width:100%;align-content:center;}
+  .card-x{background:var(--card);border:3px solid var(--teal);border-radius:18px;padding:24px 30px;opacity:0;transform:translateY(34px);transition:all .6s cubic-bezier(.175,.885,.32,1.275);}
+  .card-x.coral{border-color:var(--coral);} .slide.active .card-x{opacity:1;transform:translateY(0);}
+  .card-x.c1{transition-delay:.25s}.card-x.c2{transition-delay:.6s}.card-x.c3{transition-delay:.95s}
+  .card-x .big{font-size:54px;font-weight:900;color:var(--coral);line-height:1;} .card-x .t{font-size:32px;font-weight:900;} .card-x .t.teal{color:var(--teal)} .card-x .t.coral{color:var(--coral)} .card-x .d{font-size:23px;color:#55493a;margin-top:6px;font-weight:500;}
+  .concept{width:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:0;}
+  .formula{font-size:62px;font-weight:700;color:var(--ink);} .formula i{font-style:italic;} .cap{font-size:30px;color:#55493a;font-weight:700;text-align:center;}
+  .l5 h1{font-weight:900;font-size:var(--fs-hero);line-height:1.18;letter-spacing:.02em;}
+  .l5 .hl{color:var(--gold);} .l5 .subline{font-size:var(--fs-sub);color:rgba(250,247,238,.82);margin-top:24px;line-height:1.3;}
+  .l5 .sig{margin-top:56px;font-size:22px;letter-spacing:.3em;color:rgba(250,247,238,.4);font-weight:700;}
+  /* draw-in helpers */
+  .dw{stroke-dasharray:360;stroke-dashoffset:360;transition:stroke-dashoffset .8s ease;}
+  .slide-3.flowgo .dw,.slide-4.arrgo .dw,.slide-12.mapgo .dw{stroke-dashoffset:0;}
+  .nd{opacity:0;transform:scale(.85);transition:opacity .5s,transform .5s cubic-bezier(.175,.885,.32,1.4);}
+  .slide-3.flowgo .nd,.slide-4.arrgo .nd,.slide-12.mapgo .nd{opacity:1;transform:scale(1);}
+  .slide-3.flowgo .d2{transition-delay:.4s}.slide-3.flowgo .d3{transition-delay:.8s}.slide-3.flowgo .d4{transition-delay:1.2s}
+  .slide-4.arrgo .pls-ar{transition-delay:.8s} .slide-4.arrgo .lbl2{transition-delay:1.1s}
+  .slide-12.mapgo .u2{transition-delay:.5s}.slide-12.mapgo .u3{transition-delay:.9s}.slide-12.mapgo .dn2{transition-delay:.7s}.slide-12.mapgo .dn3{transition-delay:1.1s}
+  .start-screen{position:fixed;inset:0;background:var(--ink);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;cursor:pointer;transition:opacity .5s ease;}
+  .start-screen.hidden{opacity:0;pointer-events:none;} .start-screen .title{font-weight:900;font-size:clamp(44px,5.6vw,100px);color:var(--paper);text-align:center;}
+  .start-screen .title b{color:var(--gold);} .start-screen .play{width:88px;height:88px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);}
+  .start-screen .sub{color:rgba(250,247,238,.55);font-size:21px;letter-spacing:.1em;}
+</style>
+</head>
+<body>
+<div class="start-screen" id="startScreen">
+  <div class="title">PLS 回歸</div>
+  <div class="play"><svg width="26" height="30" viewBox="0 0 24 28"><path d="M2 2 L22 14 L2 26 Z" fill="currentColor"/></svg></div>
+  <div class="sub">教學影片 · NIR 食品分析（二）· 約 4.6 分鐘 · 點擊開始</div>
+</div>
+<div class="stage" id="stage">
+
+  <div class="slide slide-1 l5" data-slide="1">
+    <div class="chapter-chip"><span>01</span> / 14</div>
+    <h1>PLS 回歸</h1>
+    <div class="subline">從近紅外光譜「預測」脂肪含量</div>
+    <div class="sig">NIR 食品分析 · 第二部</div>
+  </div>
+
+  <div class="slide slide-2" data-slide="2">
+    <div class="chapter-chip"><span>02</span> / 14 — 動機</div>
+    <div class="slide-title">兩種測脂肪的方法</div>
+    <div class="content-area">
+      <div class="lr-grid">
+        <div class="lr-box coral"><h3>濕化學分析</h3><p>費時、耗試劑、<b>破壞樣本</b>。</p></div>
+        <div class="lr-box"><h3>近紅外光譜</h3><p>只要 <b>幾秒</b>、完全<b>不破壞</b>樣本。目標：用光譜 X 預測脂肪 y。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-3" data-slide="3">
+    <div class="chapter-chip"><span>03</span> / 14 — 監督式</div>
+    <div class="slide-title">先校正，再上線</div>
+    <div class="content-area">
+      <div class="concept">
+        <svg width="1220" height="240" viewBox="0 0 1220 240">
+          <g stroke="var(--teal)" stroke-width="5" fill="none">
+            <line class="dw d2b" x1="280" y1="120" x2="360" y2="120"/>
+            <line class="dw d3b" x1="600" y1="120" x2="680" y2="120"/>
+            <line class="dw d4b" x1="930" y1="120" x2="1010" y2="120"/>
+          </g>
+          <g font-family="GenSeki" text-anchor="middle">
+            <g class="nd d1"><rect x="60" y="80" width="220" height="80" rx="16" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="170" y="115" font-size="26" font-weight="900" fill="var(--ink)">光譜 X ＋ 真值 y</text><text x="170" y="148" font-size="20" fill="#6a5f4e">一批已知樣本</text></g>
+            <g class="nd d2"><circle cx="480" cy="120" r="62" fill="var(--teal)"/><text x="480" y="115" font-size="26" font-weight="900" fill="#fff">校正</text><text x="480" y="145" font-size="22" fill="#fff">模型</text></g>
+            <g class="nd d3"><rect x="680" y="80" width="250" height="80" rx="16" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="805" y="128" font-size="24" font-weight="900" fill="var(--ink)">新樣本：只量光譜</text></g>
+            <g class="nd d4"><rect x="1010" y="80" width="180" height="80" rx="16" fill="#FBE9D6" stroke="var(--coral)" stroke-width="3"/><text x="1100" y="128" font-size="26" font-weight="900" fill="var(--coral)">預測脂肪</text></g>
+          </g>
+        </svg>
+        <div class="cap">用「光譜＋真值」訓練校正模型，之後新樣本只量光譜就能預測</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-4" data-slide="4">
+    <div class="chapter-chip"><span>04</span> / 14 — 核心區別</div>
+    <div class="slide-title">為什麼不用 PCA？</div>
+    <div class="content-area">
+      <div class="concept">
+        <svg width="900" height="400" viewBox="0 0 900 400">
+          <g>
+            <circle class="dot" cx="320" cy="300" r="11" fill="#0E7C7B"/><circle cx="360" cy="280" r="11" fill="#2E8C82"/>
+            <circle cx="395" cy="262" r="11" fill="#4F9A8C"/><circle cx="430" cy="248" r="11" fill="#7FA96E"/>
+            <circle cx="455" cy="228" r="11" fill="#A8A24F"/><circle cx="490" cy="212" r="11" fill="#C8941F"/>
+            <circle cx="520" cy="190" r="11" fill="#D67A2A"/><circle cx="555" cy="172" r="11" fill="#E36414"/>
+            <circle cx="420" cy="225" r="11" fill="#8FA864"/><circle cx="470" cy="270" r="11" fill="#5F9A82"/>
+            <circle cx="520" cy="248" r="11" fill="#B89A38"/><circle cx="585" cy="205" r="11" fill="#E36414"/>
+          </g>
+          <line class="dw pca-ar" x1="290" y1="320" x2="610" y2="150" stroke="var(--teal)" stroke-width="6"/>
+          <polygon class="nd" points="610,150 587,153 598,172" fill="var(--teal)"/>
+          <text class="nd lbl1" x="540" y="125" font-size="26" font-weight="900" font-family="GenSeki" fill="var(--teal)">PCA：最大變異</text>
+          <line class="dw pls-ar" x1="360" y1="330" x2="560" y2="120" stroke="var(--coral)" stroke-width="6"/>
+          <polygon class="nd lbl2" points="560,120 540,130 556,143" fill="var(--coral)"/>
+          <text class="nd lbl2" x="640" y="300" font-size="26" font-weight="900" font-family="GenSeki" fill="var(--coral)">PLS：對準 y</text>
+        </svg>
+        <div class="cap">點色＝脂肪 y。PCA 只追最大變異；PLS 把方向「轉向」與 y 相關</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-5" data-slide="5">
+    <div class="chapter-chip"><span>05</span> / 14 — 機制</div>
+    <div class="slide-title">潛在變量 LV</div>
+    <div class="content-area">
+      <div class="concept">
+        <div class="formula">max&nbsp; cov( <i>X</i>w ,&nbsp; <i>y</i> )</div>
+        <div class="cap" style="max-width:1080px;">每個潛在變量最大化光譜 X 與脂肪 y 的<b style="color:var(--coral)">共變異</b><br>PCA 看 X 自己，PLS 一手抓 X、一手抓 y</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-6" data-slide="6">
+    <div class="chapter-chip"><span>06</span> / 14 — 準備</div>
+    <div class="slide-title">前處理與切分</div>
+    <div class="content-area">
+      <div class="lr-grid">
+        <div class="lr-box"><h3>前處理</h3><p>SNV ＋ 一階導數，凸顯吸收峰。</p></div>
+        <div class="lr-box coral"><h3>訓練 / 測試</h3><p><b>180</b> 個訓練校正、<b>60</b> 個留到最後測試，模擬沒看過的新樣本。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-7" data-slide="7">
+    <div class="chapter-chip"><span>07</span> / 14 — 選維度</div>
+    <div class="slide-title">該用幾個潛在變量？</div>
+    <div class="fig-wrap"><img src="assets/figures/fig06_pls_rmsecv.png" alt="rmsecv"></div>
+  </div>
+
+  <div class="slide slide-8" data-slide="8">
+    <div class="chapter-chip"><span>08</span> / 14 — 核心</div>
+    <div class="slide-title">成果：預測 vs 真實</div>
+    <div class="fig-wrap"><img src="assets/figures/fig07_pls_pred_vs_meas.png" alt="pred vs meas"></div>
+  </div>
+
+  <div class="slide slide-9" data-slide="9">
+    <div class="chapter-chip"><span>09</span> / 14 — 判讀</div>
+    <div class="slide-title">模型有多好？</div>
+    <div class="content-area">
+      <div class="cards" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="card-x c1"><div class="big" style="color:var(--teal)">0.96</div><div class="t">測試 R²</div><div class="d">解釋 96% 的變異</div></div>
+        <div class="card-x c2"><div class="big">2.8%</div><div class="t">RMSEP</div><div class="d">平均預測誤差（脂肪百分點）</div></div>
+        <div class="card-x c3"><div class="big">5.2</div><div class="t coral">RPD</div><div class="d">&gt;3 堪用，&gt;5 優秀</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-10" data-slide="10">
+    <div class="chapter-chip"><span>10</span> / 14 — 化學</div>
+    <div class="content-area">
+      <div class="lr-grid img-text">
+        <img src="assets/figures/fig08_pls_coef.png" alt="coefficients">
+        <div class="lr-col">
+          <div class="slide-title" style="font-size:48px;">模型在「看」哪裡？</div>
+          <p class="note">回歸係數最大尖峰在 <b style="color:var(--coral)">928 nm</b> — 脂肪 <b>C–H 吸收帶</b>。</p>
+          <p class="note">模型盯著化學訊號預測 — <b style="color:var(--teal)">可解釋，才可信</b>。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-11" data-slide="11">
+    <div class="chapter-chip"><span>11</span> / 14 — 應用</div>
+    <div class="slide-title">能用在哪？要小心什麼？</div>
+    <div class="content-area">
+      <div class="cards" style="grid-template-columns:1fr 1fr;">
+        <div class="card-x c1"><div class="t teal">✓ 應用</div><div class="d">裝在生產線上即時品管，取代費時的實驗室分析</div></div>
+        <div class="card-x c2 coral"><div class="t coral">⚠ 限制</div><div class="d">只在校正範圍內可靠；新品種、新製程要重新驗證，不可外推</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-12" data-slide="12">
+    <div class="chapter-chip"><span>12</span> / 14 — 收束</div>
+    <div class="slide-title">PCA ↔ PLS 地圖</div>
+    <div class="content-area">
+      <div class="concept">
+        <svg width="1200" height="380" viewBox="0 0 1200 380">
+          <g stroke-width="4" fill="none">
+            <line class="dw" x1="320" y1="190" x2="420" y2="190" stroke="var(--ink)"/>
+            <line class="dw u2b" x1="560" y1="150" x2="660" y2="100" stroke="var(--teal)"/>
+            <line class="dw u3b" x1="820" y1="100" x2="900" y2="100" stroke="var(--teal)"/>
+            <line class="dw dn2b" x1="560" y1="230" x2="660" y2="280" stroke="var(--coral)"/>
+            <line class="dw dn3b" x1="820" y1="280" x2="900" y2="280" stroke="var(--coral)"/>
+          </g>
+          <g font-family="GenSeki" text-anchor="middle">
+            <g class="nd"><rect x="80" y="155" width="240" height="70" rx="14" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/><text x="200" y="198" font-size="25" font-weight="900" fill="var(--ink)">光譜 → 前處理</text></g>
+            <g class="nd u2"><rect x="420" y="65" width="180" height="70" rx="14" fill="#D7ECEB" stroke="var(--teal)" stroke-width="3"/><text x="510" y="100" font-size="24" font-weight="900" fill="var(--teal)">PCA</text><text x="510" y="124" font-size="18" fill="#3a6f68">探索 / 找異常</text></g>
+            <g class="nd u3"><rect x="900" y="65" width="220" height="70" rx="14" fill="var(--card)" stroke="var(--teal)" stroke-width="2"/><text x="1010" y="108" font-size="22" font-weight="900" fill="var(--ink)">分數 · 負荷量</text></g>
+            <g class="nd dn2"><rect x="420" y="245" width="180" height="70" rx="14" fill="#FBE9D6" stroke="var(--coral)" stroke-width="3"/><text x="510" y="280" font-size="24" font-weight="900" fill="var(--coral)">PLS</text><text x="510" y="304" font-size="18" fill="#9a5520">定量預測</text></g>
+            <g class="nd dn3"><rect x="900" y="245" width="220" height="70" rx="14" fill="var(--card)" stroke="var(--coral)" stroke-width="2"/><text x="1010" y="288" font-size="22" font-weight="900" fill="var(--ink)">選 LV · 測試驗證</text></g>
+          </g>
+        </svg>
+        <div class="cap">探索用 PCA，預測用 PLS，再以獨立測試集驗證</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide slide-13 l5" data-slide="13">
+    <div class="chapter-chip"><span>13</span> / 14 — 金句</div>
+    <h1>PLS<br><span class="hl">一手抓光譜、一手抓答案</span></h1>
+    <div class="subline">把幾秒的掃描，變成可信的數字</div>
+  </div>
+
+  <div class="slide slide-14 l5" data-slide="14">
+    <div class="chapter-chip"><span>14</span> / 14 — 完</div>
+    <h1 style="font-size:clamp(40px,4.6vw,76px);">下一步：用 <span class="hl">Orange</span><br>不寫程式重現整套流程</h1>
+    <div class="sig">NIR 食品分析 · PLS · 完</div>
+  </div>
+
+</div>
+<div class="subtitle-container" id="subtitle">PLS：把光譜變成可預測的脂肪數字</div>
+<div class="progress-bar" id="progress-bar"></div>
+<script>
+const PAGES = [
+  { i: 1, dur: 18, sub: "PLS：把光譜變成可預測的脂肪數字" },
+  { i: 2, dur: 21, sub: "目標：用光譜 X 預測脂肪 y，又快又不破壞" },
+  { i: 3, dur: 20, sub: "校正：用「光譜＋真值」訓練出預測模型" },
+  { i: 4, dur: 21, sub: "PLS 找「同時解釋光譜又預測脂肪」的方向" },
+  { i: 5, dur: 19, sub: "潛在變量：最大化 X 與 y 的共變異" },
+  { i: 6, dur: 19, sub: "180 訓練 / 60 測試，留一份驗證真實表現" },
+  { i: 7, dur: 25, sub: "交叉驗證選在轉折點：4 個潛在變量" },
+  { i: 8, dur: 23, sub: "測試集 R²=0.96，點緊貼 1:1 對角線" },
+  { i: 9, dur: 20, sub: "RMSEP≈2.8%、RPD=5.2（>3 堪用，>5 優秀）" },
+  { i: 10, dur: 21, sub: "係數尖峰在 928 nm = 脂肪 C–H 訊號" },
+  { i: 11, dur: 20, sub: "可上線即時品管，但超出範圍要重新驗證" },
+  { i: 12, dur: 22, sub: "探索用 PCA，預測用 PLS，獨立測試驗證" },
+  { i: 13, dur: 12, sub: "PLS：把幾秒的掃描，變成可信的數字" },
+  { i: 14, dur: 17, sub: "下一步：用 Orange 不寫程式重現整套流程" }
+];
+let accum=0; const TIMINGS=PAGES.map(p=>{const s=accum;accum+=p.dur;return{i:p.i,s,e:accum,sub:p.sub};}); const TOTAL_DUR=accum;
+const slideEls=[...document.querySelectorAll('.slide')]; const subtitleEl=document.getElementById('subtitle');
+let progressBar=null; const startScreen=document.getElementById('startScreen');
+const audio=new Audio("renders/master_audio.mp3"); audio.preload="auto";
+let currentIdx=-1,virtualTime=0,lastTickTime=0,useVirtualTimer=false,isPlaying=false;
+const isRenderMode=new URLSearchParams(location.search).get('render')==='true';
+function tick(){
+  if(!isPlaying)return; let t=0;
+  if(useVirtualTimer||isRenderMode){const now=performance.now();if(lastTickTime===0)lastTickTime=now;const dt=(now-lastTickTime)/1000;lastTickTime=now;virtualTime+=dt;t=virtualTime;}
+  else{t=audio.currentTime;if(audio.paused&&t===0&&lastTickTime>0){const now=performance.now();const dt=(now-lastTickTime)/1000;lastTickTime=now;virtualTime+=dt;t=virtualTime;}else{lastTickTime=performance.now();}}
+  const pb=progressBar||(progressBar=document.getElementById('progress-bar')); if(pb)pb.style.width=(Math.min(t/TOTAL_DUR,1)*100)+'%';
+  const idx=TIMINGS.findIndex(p=>t>=p.s&&t<p.e);
+  if(idx!==-1&&idx!==currentIdx){slideEls.forEach((el,i)=>el.classList.toggle('active',i===idx));subtitleEl.textContent=TIMINGS[idx].sub;currentIdx=idx;resetSlideAnimations();}
+  if(currentIdx!==-1){updateSlideInternalAnimations(currentIdx+1,t-TIMINGS[currentIdx].s);}
+  if(t>=TOTAL_DUR){isPlaying=false;audio.pause();slideEls.forEach(el=>el.classList.remove('active'));slideEls[slideEls.length-1].classList.add('active');return;}
+  requestAnimationFrame(tick);
+}
+function resetSlideAnimations(){slideEls.forEach(el=>{el.className='slide slide-'+el.getAttribute('data-slide')+(el.dataset.l5==='1'?' l5':'')+(el.classList.contains('active')?' active':'');});}
+function updateSlideInternalAnimations(n,pageT){const el=slideEls[n-1];
+  if(n===3){if(pageT>=0.6)el.classList.add('flowgo');}
+  else if(n===4){if(pageT>=0.6)el.classList.add('arrgo');}
+  else if(n===8){if(pageT>=0.4)el.classList.add('pop');}
+  else if(n===12){if(pageT>=0.6)el.classList.add('mapgo');}}
+slideEls.forEach(el=>{if(el.classList.contains('l5'))el.dataset.l5='1';});
+startScreen.addEventListener('click',()=>{startScreen.classList.add('hidden');isPlaying=true;virtualTime=0;lastTickTime=performance.now();audio.currentTime=0;audio.play().catch(()=>{useVirtualTimer=true;});slideEls[0].classList.add('active');currentIdx=0;resetSlideAnimations();requestAnimationFrame(tick);});
+if(isRenderMode){startScreen.style.display='none';startScreen.classList.add('hidden');isPlaying=true;virtualTime=0;useVirtualTimer=true;lastTickTime=performance.now();audio.currentTime=0;setTimeout(()=>{audio.play().catch(()=>{});slideEls[0].classList.add('active');currentIdx=0;resetSlideAnimations();requestAnimationFrame(tick);},200);}
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# Regenerable data cache
+data/_tecator_openml_raw.csv
+
+# PDF figure-extraction scratch
+paper_assets/
+assets/_fontdl/
+
+# Per-video build assets — the live page uses /assets/fonts and /python/figures
+videos/*/assets/fonts/
+videos/*/assets/narration/
+videos/*/assets/figures/
+
+# Render intermediates (keep only the final *.mp4)
+videos/*/renders/*.webm
+videos/*/renders/master_audio.mp3
+videos/*/renders/pad-*.mp3
+
+# Paper-figure videos (JCE) kept OFF the public repo — user choice: unlisted only.
+# These embed copyrighted journal figures; served via unlisted YouTube instead.
+videos/pca-orange/
+videos/pca-orange-en/

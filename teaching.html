@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>近紅外光譜 × 食品分析 — PCA 與 PLS</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+<style>
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');font-weight:900;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');font-weight:700;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');font-weight:500;font-display:swap;}
+
+:root{
+  --paper:#FAF7EE; --paper2:#F2EDDC; --ink:#1A1A1A; --ink-soft:#403a30;
+  --teal:#0E7C7B; --coral:#E36414; --gold:#C8941F; --line:#D9D2BE;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;font-family:'GenSeki','Noto Sans TC',system-ui,sans-serif;font-weight:500;
+  color:var(--ink);background:var(--paper);line-height:1.65;font-size:18px;}
+h1,h2,h3{font-weight:900;line-height:1.2;letter-spacing:.01em;}
+a{color:var(--teal);text-decoration:none;} a:hover{text-decoration:underline;}
+code,pre,kbd{font-family:'JetBrains Mono','Fira Code',Consolas,monospace;}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(26,26,26,.96);backdrop-filter:blur(6px);
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 22px;}
+nav .brand{color:#fff;font-weight:900;font-size:18px;margin-right:auto;}
+nav .brand b{color:var(--gold);}
+nav a{color:#e9e4d6;font-weight:700;font-size:14.5px;padding:6px 11px;border-radius:8px;}
+nav a:hover{background:rgba(255,255,255,.12);text-decoration:none;color:#fff;}
+
+/* hero */
+.hero{background:var(--ink);color:var(--paper);padding:84px 22px 70px;text-align:center;}
+.hero h1{font-size:clamp(34px,6vw,66px);margin:0 0 14px;}
+.hero h1 .accent{color:var(--coral);}
+.hero p.sub{font-size:clamp(17px,2.4vw,24px);color:#cfc8b6;font-weight:700;max-width:760px;margin:0 auto 28px;}
+.hero .facts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.hero .fact{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:14px;
+  padding:14px 20px;min-width:150px;}
+.hero .fact b{display:block;font-size:30px;color:var(--gold);font-weight:900;}
+.hero .fact span{font-size:14px;color:#cfc8b6;font-weight:700;}
+
+/* layout */
+main{max-width:1080px;margin:0 auto;padding:0 22px;}
+section{padding:64px 0 8px;scroll-margin-top:64px;border-top:1px solid var(--line);}
+section:first-of-type{border-top:none;}
+.kicker{color:var(--coral);font-weight:900;font-size:15px;letter-spacing:.14em;text-transform:uppercase;}
+section h2{font-size:clamp(28px,4vw,42px);margin:6px 0 8px;}
+section h3{font-size:23px;margin:34px 0 10px;color:var(--teal);}
+p{margin:14px 0;}
+.lead{font-size:20px;color:var(--ink-soft);}
+
+/* cards */
+.grid{display:grid;gap:18px;margin:24px 0;}
+.g3{grid-template-columns:repeat(3,1fr);} .g2{grid-template-columns:repeat(2,1fr);}
+.card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px;}
+.card h4{margin:0 0 8px;font-size:19px;font-weight:900;color:var(--teal);}
+.card.coral h4{color:var(--coral);}
+.card .big{font-size:40px;font-weight:900;color:var(--coral);line-height:1;margin:4px 0 6px;}
+
+/* figure */
+figure{margin:26px 0;background:var(--paper2);border:1px solid var(--line);border-radius:16px;
+  padding:14px;text-align:center;}
+figure img{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto;}
+figcaption{font-size:15px;color:var(--ink-soft);font-weight:700;margin-top:10px;}
+figcaption b{color:var(--coral);}
+
+/* callout */
+.callout{border-left:6px solid var(--teal);background:var(--paper2);border-radius:0 14px 14px 0;
+  padding:18px 22px;margin:24px 0;font-size:18px;}
+.callout.coral{border-color:var(--coral);}
+.callout .tag{font-weight:900;color:var(--teal);} .callout.coral .tag{color:var(--coral);}
+
+/* video */
+.video-wrap{background:var(--ink);border-radius:16px;overflow:hidden;margin:24px 0;border:1px solid var(--line);}
+.video-wrap video{width:100%;display:block;background:#000;}
+.video-note{padding:12px 18px;color:#cfc8b6;font-size:14px;font-weight:700;background:var(--ink);}
+
+/* code */
+pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;border:1px solid #2c313a;}
+pre code{display:block;padding:20px 22px;font-size:14.5px;line-height:1.6;background:transparent;}
+.codecap{font-size:14px;font-weight:700;color:var(--ink-soft);margin:18px 0 -8px;}
+details{background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:6px 18px;margin:14px 0;}
+summary{font-weight:900;cursor:pointer;padding:10px 0;color:var(--teal);}
+
+/* table */
+table{width:100%;border-collapse:collapse;margin:24px 0;font-size:16.5px;background:var(--paper2);
+  border-radius:14px;overflow:hidden;}
+th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);}
+th{background:var(--teal);color:#fff;font-weight:900;}
+tr:last-child td{border-bottom:none;}
+td b.teal{color:var(--teal);} td b.coral{color:var(--coral);}
+
+/* orange flow */
+.flow{background:#1f2329;color:#e9e4d6;border-radius:14px;padding:20px;overflow:auto;font-size:13.5px;line-height:1.5;}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;}
+.btn{background:var(--teal);color:#fff;font-weight:900;padding:12px 20px;border-radius:12px;font-size:15px;}
+.btn.coral{background:var(--coral);} .btn:hover{text-decoration:none;opacity:.92;}
+
+footer{background:var(--ink);color:#cfc8b6;padding:40px 22px;margin-top:60px;text-align:center;font-size:14px;}
+footer b{color:var(--gold);}
+.eq{background:var(--paper2);border:1px dashed var(--teal);border-radius:12px;padding:14px 18px;margin:18px 0;text-align:center;font-size:20px;}
+
+@media(max-width:760px){.g3,.g2{grid-template-columns:1fr;} body{font-size:17px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">NIR × 食品分析 <b>·</b> PCA / PLS</span>
+  <a href="#nir">NIR</a>
+  <a href="#data">資料</a>
+  <a href="#pca">PCA</a>
+  <a href="#pls">PLS</a>
+  <a href="#python">Python</a>
+  <a href="#orange">Orange</a>
+  <a href="#summary">總結</a>
+</nav>
+
+<header class="hero">
+  <h1>近紅外光譜，看穿<span class="accent">食品成分</span></h1>
+  <p class="sub">用真實的 Tecator 肉品光譜資料，學會兩個化學計量學核心方法：<br>PCA 探索結構、PLS 定量預測。</p>
+  <div class="facts">
+    <div class="fact"><b>240</b><span>肉品樣本</span></div>
+    <div class="fact"><b>100</b><span>波長 (850–1050 nm)</span></div>
+    <div class="fact"><b>98.9%</b><span>前 3 個 PC 變異</span></div>
+    <div class="fact"><b>R²=0.96</b><span>PLS 預測脂肪</span></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ===== NIR ===== -->
+<section id="nir">
+  <span class="kicker">為什麼是近紅外光</span>
+  <h2>幾秒鐘、不破壞，就看穿成分</h2>
+  <p class="lead">近紅外光（Near-Infrared, NIR，約 780–2500 nm）會被食品中 O–H、C–H、N–H 等化學鍵吸收。
+  量一條光譜，等於同時「問」了樣本裡的水分、脂肪、蛋白質——而且不需要試劑、不破壞樣本。</p>
+  <div class="grid g3">
+    <div class="card"><h4>快</h4>一次掃描幾秒鐘，可裝在生產線上即時量測。</div>
+    <div class="card"><h4>非破壞</h4>光照進去、反射或穿透出來，樣本完好如初。</div>
+    <div class="card coral"><h4>但是…</h4>一條光譜是上百個高度重疊的數字，<b>必須靠化學計量學</b>才能解讀。</div>
+  </div>
+  <div class="callout"><span class="tag">本課兩步走：</span>
+    先用 <b>PCA</b>（非監督）看資料裡有什麼結構，再用 <b>PLS</b>（監督）建立能預測含量的模型。</div>
+</section>
+
+<!-- ===== DATA ===== -->
+<section id="data">
+  <span class="kicker">資料集</span>
+  <h2>Tecator 肉品 NIR（公開資料）</h2>
+  <p class="lead">Tecator Infratec 食品分析儀量測的 240 個肉品樣本，每個樣本有 100 個波長（850–1050 nm）的吸光值，
+  並以濕化學測得水分、脂肪、蛋白質的真值。屬公開資料（StatLib / OpenML id 505）。</p>
+  <figure>
+    <img src="python/figures/fig01_raw_spectra.png" alt="Tecator 原始 NIR 光譜">
+    <figcaption>240 條原始光譜，依脂肪含量上色。<b>每條線是一個樣本、100 個數字</b>——人眼無法直接判讀。</figcaption>
+  </figure>
+  <table>
+    <tr><th>成分</th><th>範圍 (%)</th><th>平均</th><th>本課用途</th></tr>
+    <tr><td>水分 moisture</td><td>32.8 – 76.6</td><td>62.9</td><td>備用目標</td></tr>
+    <tr><td><b class="coral">脂肪 fat</b></td><td>0.9 – 58.5</td><td>18.5</td><td><b class="coral">PLS 預測目標</b></td></tr>
+    <tr><td>蛋白質 protein</td><td>8.8 – 23.2</td><td>17.8</td><td>備用目標</td></tr>
+  </table>
+  <h3>前處理：SNV 散射校正</h3>
+  <p>不同樣本的顆粒、量測距離會讓基線整條飄移。<b>標準常態變量轉換（SNV）</b>把每條光譜各自校正，凸顯真正的化學差異。</p>
+  <figure>
+    <img src="python/figures/fig02_snv_spectra.png" alt="SNV 校正後的光譜">
+    <figcaption>SNV 後基線對齊、脂肪造成的差異更清楚。</figcaption>
+  </figure>
+</section>
+
+<!-- ===== PCA ===== -->
+<section id="pca">
+  <span class="kicker">方法一 · 非監督</span>
+  <h2>PCA：把上百個波長壓成幾個方向</h2>
+  <p class="lead">主成分分析（Principal Component Analysis）在資料最分散的方向上建立新座標軸：
+  PC1 是變異最大的方向、PC2 與它垂直且次大……少數幾個主成分，就能描述幾乎全部的資訊。</p>
+
+  <div class="video-wrap">
+    <video controls poster="python/figures/fig04_pca_scores.png" preload="none">
+      <source src="videos/pca/renders/nir_pca.mp4" type="video/mp4">
+      您的瀏覽器不支援影片標籤。
+    </video>
+    <div class="video-note">🎬 教學影片（一）PCA — 渲染完成後於此播放（~4.5 分）。</div>
+  </div>
+
+  <div class="eq">$X \approx T\,P^{\top}$ &nbsp;—&nbsp; 分數 $T$ 是樣本位置、負荷量 $P$ 是波長如何組成新方向</div>
+
+  <h3>要保留幾個主成分？</h3>
+  <figure>
+    <img src="python/figures/fig03_pca_scree.png" alt="PCA 陡坡圖">
+    <figcaption>陡坡圖：PC1 佔 <b>68.9%</b>、前 2 個 <b>97.3%</b>、前 3 個 <b>98.9%</b>。100 個波長幾乎可濃縮成 3 個數字。</figcaption>
+  </figure>
+
+  <h3>分數圖：樣本自己排好了</h3>
+  <figure>
+    <img src="python/figures/fig04_pca_scores.png" alt="PCA 分數圖">
+    <figcaption>每個點是一個肉品樣本，顏色為脂肪含量。<b>PCA 從沒看過脂肪值</b>，樣本卻沿 PC1 依脂肪排列；虛線橢圓為 95% 信賴範圍，圈外即可疑樣本。</figcaption>
+  </figure>
+  <div class="callout coral"><span class="tag">核心觀念：</span>
+    PCA 是<b>非監督</b>的——它只看光譜、不用任何標準答案，卻能讓結構自己浮現。它擅長探索、分群、找異常，但<b>不會</b>直接告訴你「脂肪幾趴」。</div>
+
+  <h3>負荷量回連化學</h3>
+  <figure>
+    <img src="python/figures/fig05_pca_loadings.png" alt="PCA 負荷量">
+    <figcaption>PC1、PC2 的負荷量在 <b>~930 nm</b> 有明顯起伏，正是脂肪 C–H 鍵的吸收帶——PCA 自己「重新發現」了脂肪訊號。</figcaption>
+  </figure>
+</section>
+
+<!-- ===== PLS ===== -->
+<section id="pls">
+  <span class="kicker">方法二 · 監督</span>
+  <h2>PLS：從光譜「預測」脂肪含量</h2>
+  <p class="lead">偏最小二乘回歸（Partial Least Squares）找出的方向，<b>同時</b>解釋光譜的變異、又與目標脂肪相關。
+  這就是它和 PCA 的關鍵差異：PCA 只看 X，PLS 一手抓 X、一手抓 y。</p>
+
+  <div class="video-wrap">
+    <video controls poster="python/figures/fig07_pls_pred_vs_meas.png" preload="none">
+      <source src="videos/pls/renders/nir_pls.mp4" type="video/mp4">
+      您的瀏覽器不支援影片標籤。
+    </video>
+    <div class="video-note">🎬 教學影片（二）PLS — 渲染完成後於此播放（~5 分）。</div>
+  </div>
+
+  <div class="eq">$\max\ \operatorname{cov}(Xw,\ y)$ &nbsp;—&nbsp; 每個潛在變量（LV）最大化光譜與脂肪的共變異</div>
+
+  <h3>該用幾個潛在變量？用交叉驗證</h3>
+  <figure>
+    <img src="python/figures/fig06_pls_rmsecv.png" alt="RMSECV vs 潛在變量">
+    <figcaption>誤差在第 <b>4</b> 個潛在變量後幾乎不再下降；再加只是背雜訊（<b>過度擬合</b>）。故選在轉折點。</figcaption>
+  </figure>
+
+  <h3>成果：預測 vs 真實</h3>
+  <figure>
+    <img src="python/figures/fig07_pls_pred_vs_meas.png" alt="PLS 預測 vs 真實">
+    <figcaption>校正集與測試集都緊貼 1:1 線。模型沒看過那 60 個測試樣本，仍 <b>R²=0.964</b>。</figcaption>
+  </figure>
+  <div class="grid g3">
+    <div class="card"><h4>R² = 0.96</h4>解釋了測試集 96% 的變異。</div>
+    <div class="card"><h4>RMSEP ≈ 2.8%</h4>平均預測誤差（脂肪百分點）。</div>
+    <div class="card coral"><div class="big">RPD 5.2</div>&gt;3 堪用、&gt;5 屬優秀。</div>
+  </div>
+
+  <h3>模型在「看」哪裡？</h3>
+  <figure>
+    <img src="python/figures/fig08_pls_coef.png" alt="PLS 回歸係數">
+    <figcaption>回歸係數最大尖峰落在 <b>~928 nm</b>（脂肪 C–H 帶）——模型盯著化學訊號預測，<b>可解釋才可信</b>。</figcaption>
+  </figure>
+  <div class="callout coral"><span class="tag">限制：</span>
+    校正模型只在它見過的範圍內可靠。遇到新品種、新製程，必須重新驗證，不能直接外推。</div>
+</section>
+
+<!-- ===== PYTHON ===== -->
+<section id="python">
+  <span class="kicker">怎麼算的</span>
+  <h2>Python 程式（scikit-learn）</h2>
+  <p class="lead">整套分析用 <code>numpy / scikit-learn / scipy</code> 完成，可重現。完整檔案見 <code>python/</code> 目錄。</p>
+
+  <p class="codecap">前處理 — SNV 散射校正（<code>python/nir_utils.py</code>）</p>
+  <pre><code class="language-python">def snv(X):
+    """Standard Normal Variate：逐樣本（逐列）散射校正。"""
+    mu = X.mean(axis=1, keepdims=True)
+    sd = X.std(axis=1, keepdims=True)
+    return (X - mu) / sd</code></pre>
+
+  <p class="codecap">PCA — 主成分分析（<code>python/02_pca.py</code>）</p>
+  <pre><code class="language-python">from sklearn.decomposition import PCA
+
+Xp = snv(X)                          # 散射校正
+pca = PCA(n_components=10).fit(Xp)
+scores = pca.transform(Xp)           # 樣本在新軸上的位置 (T)
+evr = pca.explained_variance_ratio_ * 100
+# PC1 = 68.9% | 前2個 = 97.3% | 前3個 = 98.9%</code></pre>
+
+  <p class="codecap">PLS — 偏最小二乘回歸，預測脂肪（<code>python/03_pls.py</code>）</p>
+  <pre><code class="language-python">from sklearn.cross_decomposition import PLSRegression
+from sklearn.model_selection import train_test_split, cross_val_predict, KFold
+
+Xp = savgol_d(snv(X), window=15, poly=2, deriv=1)        # SNV + 一階導數
+Xtr, Xte, ytr, yte = train_test_split(Xp, y_fat,
+                                       test_size=0.25, random_state=42)
+# 用 10-fold 交叉驗證 + 轉折點規則挑潛在變量 -> 4 個
+model = PLSRegression(n_components=4).fit(Xtr, ytr)
+yte_p = model.predict(Xte).ravel()
+# 測試集 R² = 0.964 | RMSEP = 2.79% | RPD = 5.2</code></pre>
+
+  <details>
+    <summary>▶ 如何在本機重跑</summary>
+    <pre><code class="language-bash">pip install numpy pandas scipy scikit-learn matplotlib
+cd python
+python 01_data_prep.py    # 抓資料 + 原始/SNV 光譜圖
+python 02_pca.py          # 陡坡 / 分數 / 負荷量
+python 03_pls.py          # 選 LV / 預測 vs 真實 / 係數
+# 所有圖輸出到 python/figures/</code></pre>
+  </details>
+</section>
+
+<!-- ===== ORANGE ===== -->
+<section id="orange">
+  <span class="kicker">不寫程式的版本</span>
+  <h2>用 Orange Data Mining 親手拉一遍</h2>
+  <p class="lead">課堂可用 <b>Orange</b> 的拖拉式 widget，不寫一行程式就重現上面的 PCA 與 PLS。
+  開啟 <code>orange/nir_tecator_workflow.ows</code>，把 File 指向 <code>data/tecator.csv</code>、設 <code>fat</code> 為 target 即可。</p>
+  <div class="video-wrap">
+    <div class="video-note" style="padding:24px 20px;font-size:15px;line-height:1.7;">🎬 教學影片：用 Orange 視覺化程式設計做 PCA（五種糖 NIR）<br>改編自 Yeh, T.-S. <i>J. Chem. Educ.</i> 2025, 102, 1428–1435 · 影片以 <b>YouTube（unlisted）</b>提供，連結整理中。</div>
+  </div>
+  <div class="flow"><pre style="margin:0;background:none;border:none;padding:0;color:#e9e4d6;">          ┌─ Data Table        （檢視原始數字）
+          │
+ File ────┼─ PCA ──Transformed Data──▶ Scatter Plot    ← PCA 分支（探索；Color = fat）
+(tecator) │
+          ├─ PLS ──Learner──▶ Test &amp; Score             ← PLS 分支（R² / RMSE）
+          │     └─ Model ──▶ Predictions ──▶ Scatter Plot（預測 vs 真實）
+          └────────────────（Data 同時接 Test&amp;Score / Predictions）</pre></div>
+  <table>
+    <tr><th>對應概念</th><th>Python 圖</th><th>Orange widget</th></tr>
+    <tr><td>原始光譜</td><td>fig01</td><td>File → Data Table</td></tr>
+    <tr><td>主成分數量</td><td>fig03</td><td>PCA 視窗內變異曲線</td></tr>
+    <tr><td>分數圖（依脂肪上色）</td><td>fig04</td><td>PCA → Scatter Plot（Color=fat）</td></tr>
+    <tr><td>選 LV / 過度擬合</td><td>fig06</td><td>調 PLS Components + Test&amp;Score</td></tr>
+    <tr><td>預測 vs 真實</td><td>fig07</td><td>Predictions → Scatter Plot</td></tr>
+    <tr><td>回歸係數 → 化學</td><td>fig08</td><td>PLS「Coefficients and Loadings」</td></tr>
+  </table>
+  <div class="btnrow">
+    <a class="btn" href="orange/nir_tecator_workflow.ows">⬇ 下載 .ows 工作流程</a>
+    <a class="btn coral" href="orange/ORANGE_GUIDE.md">📖 Orange 圖解步驟指南</a>
+  </div>
+</section>
+
+<!-- ===== SUMMARY ===== -->
+<section id="summary">
+  <span class="kicker">總結</span>
+  <h2>PCA 與 PLS，一張表看懂</h2>
+  <table>
+    <tr><th>面向</th><th>PCA</th><th>PLS</th></tr>
+    <tr><td>學習方式</td><td><b class="teal">非監督</b>（只看 X）</td><td><b class="coral">監督</b>（用 X 與 y）</td></tr>
+    <tr><td>目的</td><td>探索結構、分群、找異常</td><td>定量預測（如脂肪 %）</td></tr>
+    <tr><td>找方向的準則</td><td>最大化 X 的變異</td><td>最大化 X 與 y 的共變異</td></tr>
+    <tr><td>本課結果</td><td>前 3 個 PC 抓 98.9% 變異</td><td>測試集 R²=0.96、RPD 5.2</td></tr>
+    <tr><td>關鍵圖</td><td>陡坡圖、分數圖、負荷量</td><td>RMSECV、預測 vs 真實、係數</td></tr>
+    <tr><td>何時用</td><td>先用它「看」資料</td><td>確定要預測時用它建模</td></tr>
+  </table>
+  <div class="callout"><span class="tag">帶走兩句話：</span>
+    PCA 把上百個波長壓縮成看得懂的方向；PLS 一手抓光譜、一手抓答案，把幾秒的掃描變成可信的數字。</div>
+</section>
+
+</main>
+
+<footer>
+  資料來源：Tecator（StatLib / OpenML id 505，公開）。分析與圖表以 Python（scikit-learn）產生。<br>
+  教學影片以 <b>claude-code-video-kit</b> 製作（純 CSS/JS + Playwright + FFmpeg）。<br>
+  近紅外光譜 × 食品分析教學包 · PCA / PLS
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.body,{delimiters:[
+      {left:"$",right:"$",display:false}]});
+  }
+  if(window.hljs){hljs.highlightAll();}
+});
+</script>
+</body>
+</html>

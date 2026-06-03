@@ -1,0 +1,8 @@
+best_LV=4
+R2C=0.974
+RMSEC=2.31
+R2P=0.964
+RMSEP=2.79
+RPD=5.24
+n_train=180
+n_test=60
