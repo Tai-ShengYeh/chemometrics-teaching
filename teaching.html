@@ -81,6 +81,8 @@ figcaption b{color:var(--coral);}
 /* video */
 .video-wrap{background:var(--ink);border-radius:16px;overflow:hidden;margin:24px 0;border:1px solid var(--line);}
 .video-wrap video{width:100%;display:block;background:#000;}
+.video-wrap iframe{width:100%;aspect-ratio:16/9;display:block;border:0;background:#000;}
+.video-note a{color:var(--gold);}
 .video-note{padding:12px 18px;color:#cfc8b6;font-size:14px;font-weight:700;background:var(--ink);}
 
 /* code */
@@ -184,11 +186,8 @@ footer b{color:var(--gold);}
   PC1 是變異最大的方向、PC2 與它垂直且次大……少數幾個主成分，就能描述幾乎全部的資訊。</p>
 
   <div class="video-wrap">
-    <video controls poster="python/figures/fig04_pca_scores.png" preload="none">
-      <source src="videos/pca/renders/nir_pca.mp4" type="video/mp4">
-      您的瀏覽器不支援影片標籤。
-    </video>
-    <div class="video-note">🎬 教學影片（一）PCA — 渲染完成後於此播放（~4.5 分）。</div>
+    <iframe src="https://www.youtube-nocookie.com/embed/Asplq5N4XkU" title="PCA 教學影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="video-note">🎬 教學影片（一）PCA · 約 4.4 分 · <a href="https://youtu.be/Asplq5N4XkU" target="_blank" rel="noopener">在 YouTube 開啟</a></div>
   </div>
 
   <div class="eq">$X \approx T\,P^{\top}$ &nbsp;—&nbsp; 分數 $T$ 是樣本位置、負荷量 $P$ 是波長如何組成新方向</div>
@@ -222,11 +221,8 @@ footer b{color:var(--gold);}
   這就是它和 PCA 的關鍵差異：PCA 只看 X，PLS 一手抓 X、一手抓 y。</p>
 
   <div class="video-wrap">
-    <video controls poster="python/figures/fig07_pls_pred_vs_meas.png" preload="none">
-      <source src="videos/pls/renders/nir_pls.mp4" type="video/mp4">
-      您的瀏覽器不支援影片標籤。
-    </video>
-    <div class="video-note">🎬 教學影片（二）PLS — 渲染完成後於此播放（~5 分）。</div>
+    <iframe src="https://www.youtube-nocookie.com/embed/yqUmlR_W8yc" title="PLS 教學影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="video-note">🎬 教學影片（二）PLS · 約 4.6 分 · <a href="https://youtu.be/yqUmlR_W8yc" target="_blank" rel="noopener">在 YouTube 開啟</a></div>
   </div>
 
   <div class="eq">$\max\ \operatorname{cov}(Xw,\ y)$ &nbsp;—&nbsp; 每個潛在變量（LV）最大化光譜與脂肪的共變異</div>
@@ -309,7 +305,8 @@ python 03_pls.py          # 選 LV / 預測 vs 真實 / 係數
   <p class="lead">課堂可用 <b>Orange</b> 的拖拉式 widget，不寫一行程式就重現上面的 PCA 與 PLS。
   開啟 <code>orange/nir_tecator_workflow.ows</code>，把 File 指向 <code>data/tecator.csv</code>、設 <code>fat</code> 為 target 即可。</p>
   <div class="video-wrap">
-    <div class="video-note" style="padding:24px 20px;font-size:15px;line-height:1.7;">🎬 教學影片：用 Orange 視覺化程式設計做 PCA（五種糖 NIR）<br>改編自 Yeh, T.-S. <i>J. Chem. Educ.</i> 2025, 102, 1428–1435 · 影片以 <b>YouTube（unlisted）</b>提供，連結整理中。</div>
+    <iframe src="https://www.youtube-nocookie.com/embed/ZcWxptt8sYA" title="用 Orange 做 PCA 教學影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="video-note">🎬 教學影片：用 Orange 視覺化程式設計做 PCA（五種糖 NIR）· 改編自 Yeh, T.-S. <i>J. Chem. Educ.</i> 2025, 102, 1428–1435 · <a href="https://youtu.be/ZcWxptt8sYA" target="_blank" rel="noopener">在 YouTube 開啟</a></div>
   </div>
   <div class="flow"><pre style="margin:0;background:none;border:none;padding:0;color:#e9e4d6;">          ┌─ Data Table        （檢視原始數字）
           │

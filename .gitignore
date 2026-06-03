@@ -14,10 +14,8 @@ videos/*/assets/fonts/
 videos/*/assets/narration/
 videos/*/assets/figures/
 
-# Render intermediates (keep only the final *.mp4)
-videos/*/renders/*.webm
-videos/*/renders/master_audio.mp3
-videos/*/renders/pad-*.mp3
+# Render outputs — videos are hosted on YouTube (unlisted) and embedded via iframe
+videos/*/renders/
 
 # Paper-figure videos (JCE) kept OFF the public repo — user choice: unlisted only.
 # These embed copyrighted journal figures; served via unlisted YouTube instead.
