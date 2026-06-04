@@ -6,14 +6,17 @@ HTML course, runnable Python, an Orange Data Mining workflow, and narrated video
 
 **▶ Live course page:** https://tai-shengyeh.github.io/chemometrics-teaching/
 
-## 📚 Course series — Chemometrics × Food Analysis
+## 📚 Course series — Spectroscopy × Food Analysis (chemometrics)
 
-Two sibling courses, same teaching pipeline (interactive page + Python + Orange + narrated videos):
+Four sibling courses, same teaching pipeline (interactive page + Python + Orange + narrated videos).
+**🏠 Course portal:** https://tai-shengyeh.github.io/
 
-| Course | Methods | Data | Live | Repo |
-|--------|---------|------|------|------|
-| **NIR spectroscopy (this repo)** | PCA + PLS (quantify) | Tecator meat | [page ↗](https://tai-shengyeh.github.io/chemometrics-teaching/) | this repo |
-| Mass spectrometry | PCA + PLS-DA (classify) | White-wine GC-MS | [page ↗](https://tai-shengyeh.github.io/ms-food-analysis/) | [ms-food-analysis ↗](https://github.com/Tai-ShengYeh/ms-food-analysis) |
+| Course | Methods | Data / app | Live |
+|--------|---------|-----------|------|
+| **NIR spectroscopy (this repo)** | PCA + PLS (quantify) | Tecator meat | [page ↗](https://tai-shengyeh.github.io/chemometrics-teaching/) |
+| Mass spectrometry | PCA + PLS-DA (classify) | White-wine GC-MS | [page ↗](https://tai-shengyeh.github.io/ms-food-analysis/) |
+| Raman spectroscopy | scattering + chemometrics | interactive slides + games | [page ↗](https://tai-shengyeh.github.io/raman-food-analysis/) |
+| Hyperspectral imaging | imaging + Orange/Python | SpectroFood workflow | [page ↗](https://tai-shengyeh.github.io/hyperspectral-food-analysis/) |
 
 ## Contents
 
