@@ -6,6 +6,15 @@ HTML course, runnable Python, an Orange Data Mining workflow, and narrated video
 
 **▶ Live course page:** https://tai-shengyeh.github.io/chemometrics-teaching/
 
+## 📚 Course series — Chemometrics × Food Analysis
+
+Two sibling courses, same teaching pipeline (interactive page + Python + Orange + narrated videos):
+
+| Course | Methods | Data | Live | Repo |
+|--------|---------|------|------|------|
+| **NIR spectroscopy (this repo)** | PCA + PLS (quantify) | Tecator meat | [page ↗](https://tai-shengyeh.github.io/chemometrics-teaching/) | this repo |
+| Mass spectrometry | PCA + PLS-DA (classify) | White-wine GC-MS | [page ↗](https://tai-shengyeh.github.io/ms-food-analysis/) | [ms-food-analysis ↗](https://github.com/Tai-ShengYeh/ms-food-analysis) |
+
 ## Contents
 
 | Path | What |
