@@ -119,6 +119,7 @@ footer b{color:var(--gold);}
   <span class="brand">NIR × 食品分析 <b>·</b> PCA / PLS</span>
   <a href="#nir">NIR</a>
   <a href="#data">資料</a>
+  <a href="#getdata">讀檔</a>
   <a href="#pca">PCA</a>
   <a href="#pls">PLS</a>
   <a href="#python">Python</a>
@@ -176,6 +177,98 @@ footer b{color:var(--gold);}
     <img src="python/figures/fig02_snv_spectra.png" alt="SNV 校正後的光譜">
     <figcaption>SNV 後基線對齊、脂肪造成的差異更清楚。</figcaption>
   </figure>
+</section>
+
+<!-- ===== GET DATA / FILE FORMATS ===== -->
+<section id="getdata">
+  <span class="kicker">拿到資料</span>
+  <h2>下載 Tecator，讀進 Python（.csv / .arff / .json）</h2>
+  <p class="lead">本 repo 的 <code>data/tecator.csv</code> 已是整理好的乾淨版，<code>pd.read_csv</code> 即可用。
+  但你在公開資料庫遇到的原始檔，常是 <b>.arff</b>（Weka／OpenML 原生格式）或 <b>.json</b>。
+  這一節把「從哪裡下載、三種格式怎麼讀」一次講清楚。</p>
+
+  <div class="grid g3">
+    <div class="card"><h4>① 本 repo（最快）</h4><code>data/tecator.csv</code>：240 列 × 100 波長欄 + moisture／fat／protein，直接 <code>pd.read_csv</code> 就能用。</div>
+    <div class="card"><h4>② OpenML（線上）</h4>資料 id <b>505</b>、原生 <b>.arff</b> 格式、預設目標 <code>fat</code>。可用 <code>sklearn</code> 一行抓，或從網站下載。</div>
+    <div class="card coral"><h4>③ StatLib（原始）</h4>原始出處 <code>lib.stat.cmu.edu/datasets/tecator</code>，純文字檔，需自行切欄位，最費工。</div>
+  </div>
+
+  <h3>下載：一行抓下來（sklearn → OpenML）</h3>
+  <p>這正是 <code>python/nir_utils.py</code> 取資料的方式——第一次連網下載、快取成 CSV，之後離線可用。</p>
+  <pre><code class="language-python">from sklearn.datasets import fetch_openml
+
+# OpenML 上的 Tecator（data id 505），回傳 pandas DataFrame
+ds = fetch_openml("tecator", version=1, as_frame=True, parser="auto")
+df = ds.frame
+df.to_csv("tecator.csv", index=False)         # 存一份離線備份
+
+# 欄位：absorbance_1..absorbance_100（吸光值）
+#       principal_component_1..22（OpenML 附的 PCA 特徵，本課用不到）
+#       moisture / fat / protein（濕化學真值，% w/w）
+abs_cols = [c for c in df.columns if c.startswith("absorbance_")]
+X = df[abs_cols].to_numpy(float)              # (240, 100) 光譜矩陣
+y = df[["moisture", "fat", "protein"]].astype(float)
+print(X.shape, list(y.columns))               # (240, 100) ['moisture','fat','protein']</code></pre>
+  <p class="codecap">想直接拿原始檔？OpenML 的 .arff 載點（也可在瀏覽器開 <code>openml.org/d/505</code> 點 Download）：</p>
+  <pre><code class="language-bash">curl -L -o tecator.arff https://www.openml.org/data/v1/download/52617/tecator.arff</code></pre>
+
+  <h3>讀取 .arff 檔（Weka／OpenML 原生格式）</h3>
+  <p>ARFF（Attribute-Relation File Format）是純文字：開頭用 <code>@relation</code>、<code>@attribute</code> 宣告每個欄位，
+  <code>@data</code> 之後才是逗號分隔的數值列。Python 有兩種常見讀法：</p>
+  <p class="codecap">法一 — SciPy（scipy 內建，免額外安裝）</p>
+  <pre><code class="language-python">from scipy.io import arff
+import pandas as pd
+
+data, meta = arff.loadarff("tecator.arff")
+df = pd.DataFrame(data)
+print(meta)                                   # 印出每個 @attribute 的型別
+
+X = df[[c for c in df.columns if c.startswith("absorbance_")]].to_numpy(float)
+y = df[["moisture", "fat", "protein"]].astype(float)</code></pre>
+  <p class="codecap">法二 — liac-arff（<code>pip install liac-arff</code>，保留完整 metadata）</p>
+  <pre><code class="language-python">import arff                                   # 套件名 liac-arff，import 名為 arff
+import pandas as pd
+
+with open("tecator.arff", encoding="utf-8") as f:
+    dataset = arff.load(f)
+cols = [name for name, attr_type in dataset["attributes"]]   # 欄位名稱清單
+df = pd.DataFrame(dataset["data"], columns=cols)
+print(df.shape)                               # (240, 125)：100 吸光 + 22 PC + 3 目標</code></pre>
+  <div class="callout"><span class="tag">小提醒：</span>
+    用 SciPy 讀 ARFF 時，<b>數值欄位</b>直接是 float，但<b>名目／字串（nominal）欄位</b>會讀成 <code>b'...'</code>（bytes），
+    需要 <code>df[col] = df[col].str.decode("utf-8")</code> 轉回字串。Tecator 全為連續數值，可略過此步。</div>
+
+  <h3>讀取 .json 檔</h3>
+  <p>有時資料以 JSON 交換（API 回傳，或自己轉存）。最通用的是「每列一筆物件」的 records 格式：</p>
+  <pre><code class="language-python">import pandas as pd, json
+
+# 先把資料存成 JSON（orient="records"：list of dict，最通用）
+df.to_json("tecator.json", orient="records", indent=2, force_ascii=False)
+
+# 讀回來：pandas 一行搞定
+df = pd.read_json("tecator.json", orient="records")
+
+# 或用標準函式庫 json，手動轉 DataFrame（適合巢狀／自訂結構）
+with open("tecator.json", encoding="utf-8") as f:
+    rows = json.load(f)                       # -> list[dict]
+df = pd.DataFrame(rows)
+
+X = df[[c for c in df.columns if c.startswith("absorbance_")]].to_numpy(float)
+y = df[["moisture", "fat", "protein"]].astype(float)</code></pre>
+  <details>
+    <summary>▶ 進階：用 OpenML 的 JSON API 取得 metadata 與載點</summary>
+    <pre><code class="language-python">import requests
+
+# OpenML 的資料描述本身就是 JSON（含格式、預設目標、.arff 載點）
+meta = requests.get("https://www.openml.org/api/v1/json/data/505").json()
+d = meta["data_set_description"]
+print(d["name"], d["format"], d["default_target_attribute"])   # Tecator ARFF fat
+print(d["url"])           # -> .arff 下載連結，再用上面的 scipy / liac-arff 讀取</code></pre>
+  </details>
+
+  <div class="callout coral"><span class="tag">統一出口：</span>
+    無論 CSV／ARFF／JSON，載入後都整理成兩塊——<b>X</b>（吸光值矩陣，240×100）與 <b>y</b>（moisture／fat／protein）。
+    接著就能直接餵給<a href="#python">下面的 PCA／PLS 程式</a>。</div>
 </section>
 
 <!-- ===== PCA ===== -->
