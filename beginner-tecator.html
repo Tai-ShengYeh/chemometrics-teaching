@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>入門：Tecator 肉品 NIR — PCA 與 PLS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');font-weight:900;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');font-weight:700;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');font-weight:500;font-display:swap;}
+:root{--paper:#FAF7EE;--paper2:#F2EDDC;--ink:#1A1A1A;--ink-soft:#403a30;--teal:#0E7C7B;--coral:#E36414;--gold:#C8941F;--line:#D9D2BE;--blue:#1D75D8;}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:'GenSeki','Noto Sans TC',system-ui,sans-serif;font-weight:500;color:var(--ink);background:var(--paper);line-height:1.65;font-size:18px} h1,h2,h3{font-weight:900;line-height:1.2;letter-spacing:.01em} a{color:var(--teal);text-decoration:none} a:hover{text-decoration:underline} code,pre,kbd{font-family:'JetBrains Mono','Fira Code',Consolas,monospace}
+nav{position:sticky;top:0;z-index:50;background:rgba(26,26,26,.96);backdrop-filter:blur(6px);display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 22px} nav .brand{color:#fff;font-weight:900;font-size:18px;margin-right:auto} nav .brand b{color:var(--gold)} nav a{color:#e9e4d6;font-weight:700;font-size:14.5px;padding:6px 11px;border-radius:8px} nav a:hover{background:rgba(255,255,255,.12);text-decoration:none;color:#fff}
+.hero{background:var(--ink);color:var(--paper);padding:84px 22px 70px;text-align:center}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 14px}.hero h1 .accent{color:var(--coral)}.hero p.sub{font-size:clamp(17px,2.4vw,24px);color:#cfc8b6;font-weight:700;max-width:860px;margin:0 auto 28px}.facts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}.fact{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:14px 20px;min-width:150px}.fact b{display:block;font-size:30px;color:var(--gold);font-weight:900}.fact span{font-size:14px;color:#cfc8b6;font-weight:700}
+main{max-width:1080px;margin:0 auto;padding:0 22px} section{padding:64px 0 8px;scroll-margin-top:64px;border-top:1px solid var(--line)} section:first-of-type{border-top:none}.kicker{color:var(--coral);font-weight:900;font-size:15px;letter-spacing:.14em;text-transform:uppercase} section h2{font-size:clamp(28px,4vw,42px);margin:6px 0 8px} section h3{font-size:23px;margin:34px 0 10px;color:var(--teal)} p{margin:14px 0}.lead{font-size:20px;color:var(--ink-soft)}
+.grid{display:grid;gap:18px;margin:24px 0}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px}.card h4{margin:0 0 8px;font-size:19px;font-weight:900;color:var(--teal)}.card.coral h4{color:var(--coral)}.card .big{font-size:38px;font-weight:900;color:var(--coral);line-height:1;margin:4px 0 6px}.badge{display:inline-block;background:#e4f3f2;color:var(--teal);border:1px solid #c8e3df;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:900;margin:2px 4px 2px 0}
+figure{margin:26px 0;background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center} figure img,figure svg{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto} figcaption{font-size:15px;color:var(--ink-soft);font-weight:700;margin-top:10px}.callout{border-left:6px solid var(--teal);background:var(--paper2);border-radius:0 14px 14px 0;padding:18px 22px;margin:24px 0;font-size:18px}.callout.coral{border-color:var(--coral)}.callout .tag{font-weight:900;color:var(--teal)}.callout.coral .tag{color:var(--coral)}
+pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;border:1px solid #2c313a} pre code{display:block;padding:20px 22px;font-size:14.5px;line-height:1.6;background:transparent}.flow{background:#1f2329;color:#e9e4d6;border-radius:14px;padding:20px;overflow:auto;font-size:13.5px;line-height:1.5} table{width:100%;border-collapse:collapse;margin:24px 0;font-size:16.5px;background:var(--paper2);border-radius:14px;overflow:hidden} th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top} th{background:var(--teal);color:#fff;font-weight:900} tr:last-child td{border-bottom:none}.eq{background:var(--paper2);border:1px dashed var(--teal);border-radius:12px;padding:14px 18px;margin:18px 0;text-align:center;font-size:20px}.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.btn{background:var(--teal);color:#fff;font-weight:900;padding:12px 20px;border-radius:12px;font-size:15px}.btn.coral{background:var(--coral)}.btn:hover{text-decoration:none;opacity:.92} footer{background:var(--ink);color:#cfc8b6;padding:40px 22px;margin-top:60px;text-align:center;font-size:14px} footer b{color:var(--gold)} @media(max-width:760px){.g3,.g2{grid-template-columns:1fr} body{font-size:17px} nav .brand{width:100%}}
+</style>
+</head>
+<body>
+<nav><span class="brand">NIR × 食品分析 <b>·</b> 入門 · Tecator</span><a href="teaching.html">總覽</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a></nav>
+<header class="hero"><h1>入門：肉品 NIR <span class="accent">PCA + PLS</span></h1><p class="sub">用 Tecator 肉品資料建立近紅外光譜化學計量學的第一個完整流程：SNV 前處理、PCA 探索、PLS 預測脂肪含量。</p><div class="facts"><div class="fact"><b>240</b><span>meat samples</span></div><div class="fact"><b>100</b><span>NIR wavelengths</span></div><div class="fact"><b>SNV</b><span>scatter correction</span></div><div class="fact"><b>PLS</b><span>fat prediction</span></div></div></header>
+<main>
+<section id="goal"><span class="kicker">Level 1 · 入門</span><h2>Tecator 肉品 NIR：從光譜到脂肪含量</h2><p class="lead">這一章使用經典 Tecator meat NIR dataset。你的任務是把 240 個肉品樣本的近紅外光譜轉成可解釋的 PCA 圖，並用 PLS regression 預測脂肪含量。</p><div class="grid g3"><div class="card"><h4>資料矩陣</h4><div class="big">240 × 100</div><p>240 個樣本，每個樣本 100 個波長吸光值。</p></div><div class="card"><h4>目標 y</h4><div class="big">fat %</div><p>以濕化學測得的脂肪含量作為 PLS 預測目標。</p></div><div class="card coral"><h4>核心方法</h4><div class="big">PCA + PLS</div><p>PCA 看結構，PLS 做定量預測。</p></div></div><p><span class="badge">OpenML id 505</span><span class="badge">NIR spectra</span><span class="badge">SNV</span><span class="badge">PLS regression</span></p></section>
+<section id="data"><span class="kicker">資料怎麼讀</span><h2>X 是光譜，y 是成分真值</h2><p>每一列是一個肉品樣本；每一欄是 850–1050 nm 的吸光值。這種資料很適合入門，因為樣本數不大、光譜乾淨、脂肪含量和 NIR 的 C–H 吸收有明確關係。</p><table><tr><th>欄位</th><th>意思</th><th>本章用途</th></tr><tr><td><code>absorbance_1 ... absorbance_100</code></td><td>NIR 吸光值</td><td>輸入矩陣 <code>X</code></td></tr><tr><td><code>moisture</code></td><td>水分 %</td><td>備用目標</td></tr><tr><td><code>fat</code></td><td>脂肪 %</td><td><b>主要預測目標 y</b></td></tr><tr><td><code>protein</code></td><td>蛋白質 %</td><td>備用目標</td></tr></table><div class="callout"><span class="tag">先建立直覺：</span>NIR 光譜不是單一峰對單一成分；脂肪、水分、蛋白質訊號高度重疊，所以需要 PCA / PLS 這類多變量方法。</div></section>
+<section id="preprocess"><span class="kicker">前處理</span><h2>SNV：先降低散射與基線差異</h2><p class="lead">肉品樣本的顆粒大小、表面狀態與量測距離會造成散射差異。SNV 會對每一條光譜各自標準化，讓模型更專注於化學差異。</p><pre><code class="language-python">def snv(X):
+    """Standard Normal Variate: row-wise scatter correction."""
+    mu = X.mean(axis=1, keepdims=True)
+    sd = X.std(axis=1, keepdims=True)
+    return (X - mu) / sd</code></pre><p>SNV 是逐樣本處理，和 autoscaling 逐變數處理不同。入門階段先比較 raw spectra 與 SNV spectra 的 PCA / PLS 結果。</p></section>
+<section id="pca"><span class="kicker">PCA</span><h2>先看脂肪含量是否沿主成分呈現梯度</h2><p>做 PCA 時不使用 <code>fat</code> 當輸入，但可以用 fat 幫 score plot 上色。若樣本沿 PC1 或 PC2 出現由低脂到高脂的連續梯度，代表光譜中的主要變異和成分差異有關。</p><pre><code class="language-python">from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+Xs = snv(X)
+Xp = StandardScaler().fit_transform(Xs)
+pca = PCA(n_components=5).fit(Xp)
+T = pca.transform(Xp)</code></pre><table><tr><th>圖</th><th>你要看什麼</th></tr><tr><td>PCA score plot</td><td>樣本是否依脂肪含量呈現梯度？是否有 outlier？</td></tr><tr><td>PCA loading plot</td><td>哪些波長推動 PC1 / PC2？是否可能和 C–H、O–H 吸收有關？</td></tr><tr><td>Scree plot</td><td>前幾個 PC 解釋多少變異？</td></tr></table></section>
+<section id="pls"><span class="kicker">PLS Regression</span><h2>用整條 NIR 光譜預測脂肪含量</h2><p class="lead">PLS 會找出同時描述 X 光譜與 y 脂肪含量的 latent variables。它比單波長回歸更適合 NIR，因為 NIR 訊號高度重疊且變數彼此相關。</p><pre><code class="language-python">from sklearn.cross_decomposition import PLSRegression
+from sklearn.model_selection import KFold, cross_val_predict
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score
+
+cv = KFold(n_splits=5, shuffle=True, random_state=42)
+model = Pipeline([
+    ("scaler", StandardScaler()),
+    ("pls", PLSRegression(n_components=6))
+])
+y_cv = cross_val_predict(model, snv(X), y_fat, cv=cv).ravel()
+print("RMSECV", mean_squared_error(y_fat, y_cv, squared=False))
+print("R2CV", r2_score(y_fat, y_cv))</code></pre><div class="callout coral"><span class="tag">本章完成標準：</span>你應該能產生 raw spectra、SNV spectra、PCA score/loading、PLS measured vs predicted，並用 R² / RMSE 說明模型好壞。</div></section>
+<section id="orange"><span class="kicker">Orange</span><h2>Orange workflow</h2><pre class="flow"><code>File
+→ Select Columns
+    Features: absorbance_1 ... absorbance_100
+    Target: fat
+    Meta: moisture, protein
+→ Preprocess
+→ PCA
+→ Scatter Plot
+→ Test and Score
+    ← Linear Regression
+    ← Random Forest Regression
+→ Predictions
+→ Scatter Plot: measured fat vs predicted fat</code></pre></section>
+<section id="next"><span class="kicker">下一步</span><h2>進入食品真偽問題</h2><p>如果你已經理解 Tecator 的 PCA 與 PLS，下一章會把 NIR 從「成分預測」推進到「食品摻偽鑑別」：咖啡是否摻 barley？摻了多少？</p><div class="btnrow"><a class="btn coral" href="intermediate-coffee-barley.html">前往中階：Coffee–Barley NIR →</a></div></section>
+</main>
+<footer><p><b>入門：Tecator 肉品 NIR — PCA 與 PLS</b></p><p>近紅外光譜 × 食品分析化學計量學 · Python + Orange Data Mining</p></footer>
+<script>window.addEventListener('DOMContentLoaded',()=>{if(window.hljs)hljs.highlightAll();if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\[',right:'\]',display:true},{left:'$',right:'$',display:false},{left:'\(',right:'\)',display:false}]});}});</script>
+</body></html>

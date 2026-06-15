@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>進階：Olive Oil Multi-block — Data Fusion 食品認證</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');font-weight:900;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');font-weight:700;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');font-weight:500;font-display:swap;}
+:root{--paper:#FAF7EE;--paper2:#F2EDDC;--ink:#1A1A1A;--ink-soft:#403a30;--teal:#0E7C7B;--coral:#E36414;--gold:#C8941F;--line:#D9D2BE;--blue:#1D75D8;}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:'GenSeki','Noto Sans TC',system-ui,sans-serif;font-weight:500;color:var(--ink);background:var(--paper);line-height:1.65;font-size:18px} h1,h2,h3{font-weight:900;line-height:1.2;letter-spacing:.01em} a{color:var(--teal);text-decoration:none} a:hover{text-decoration:underline} code,pre,kbd{font-family:'JetBrains Mono','Fira Code',Consolas,monospace}
+nav{position:sticky;top:0;z-index:50;background:rgba(26,26,26,.96);backdrop-filter:blur(6px);display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 22px} nav .brand{color:#fff;font-weight:900;font-size:18px;margin-right:auto} nav .brand b{color:var(--gold)} nav a{color:#e9e4d6;font-weight:700;font-size:14.5px;padding:6px 11px;border-radius:8px} nav a:hover{background:rgba(255,255,255,.12);text-decoration:none;color:#fff}
+.hero{background:var(--ink);color:var(--paper);padding:84px 22px 70px;text-align:center}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 14px}.hero h1 .accent{color:var(--coral)}.hero p.sub{font-size:clamp(17px,2.4vw,24px);color:#cfc8b6;font-weight:700;max-width:860px;margin:0 auto 28px}.facts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}.fact{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:14px 20px;min-width:150px}.fact b{display:block;font-size:30px;color:var(--gold);font-weight:900}.fact span{font-size:14px;color:#cfc8b6;font-weight:700}
+main{max-width:1080px;margin:0 auto;padding:0 22px} section{padding:64px 0 8px;scroll-margin-top:64px;border-top:1px solid var(--line)} section:first-of-type{border-top:none}.kicker{color:var(--coral);font-weight:900;font-size:15px;letter-spacing:.14em;text-transform:uppercase} section h2{font-size:clamp(28px,4vw,42px);margin:6px 0 8px} section h3{font-size:23px;margin:34px 0 10px;color:var(--teal)} p{margin:14px 0}.lead{font-size:20px;color:var(--ink-soft)}
+.grid{display:grid;gap:18px;margin:24px 0}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px}.card h4{margin:0 0 8px;font-size:19px;font-weight:900;color:var(--teal)}.card.coral h4{color:var(--coral)}.card .big{font-size:38px;font-weight:900;color:var(--coral);line-height:1;margin:4px 0 6px}.badge{display:inline-block;background:#e4f3f2;color:var(--teal);border:1px solid #c8e3df;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:900;margin:2px 4px 2px 0}
+figure{margin:26px 0;background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center} figure img,figure svg{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto} figcaption{font-size:15px;color:var(--ink-soft);font-weight:700;margin-top:10px}.callout{border-left:6px solid var(--teal);background:var(--paper2);border-radius:0 14px 14px 0;padding:18px 22px;margin:24px 0;font-size:18px}.callout.coral{border-color:var(--coral)}.callout .tag{font-weight:900;color:var(--teal)}.callout.coral .tag{color:var(--coral)}
+pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;border:1px solid #2c313a} pre code{display:block;padding:20px 22px;font-size:14.5px;line-height:1.6;background:transparent}.flow{background:#1f2329;color:#e9e4d6;border-radius:14px;padding:20px;overflow:auto;font-size:13.5px;line-height:1.5} table{width:100%;border-collapse:collapse;margin:24px 0;font-size:16.5px;background:var(--paper2);border-radius:14px;overflow:hidden} th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top} th{background:var(--teal);color:#fff;font-weight:900} tr:last-child td{border-bottom:none}.eq{background:var(--paper2);border:1px dashed var(--teal);border-radius:12px;padding:14px 18px;margin:18px 0;text-align:center;font-size:20px}.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.btn{background:var(--teal);color:#fff;font-weight:900;padding:12px 20px;border-radius:12px;font-size:15px}.btn.coral{background:var(--coral)}.btn:hover{text-decoration:none;opacity:.92} footer{background:var(--ink);color:#cfc8b6;padding:40px 22px;margin-top:60px;text-align:center;font-size:14px} footer b{color:var(--gold)} @media(max-width:760px){.g3,.g2{grid-template-columns:1fr} body{font-size:17px} nav .brand{width:100%}}
+</style>
+</head>
+<body>
+<nav><span class="brand">NIR × 食品分析 <b>·</b> 進階 · Data Fusion</span><a href="teaching.html">總覽</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a></nav>
+<header class="hero"><h1>進階：多儀器 <span class="accent">Data Fusion</span></h1><p class="sub">用 Olive Oil multi-block 資料學習進階 chemometrics：block scaling、low-level fusion、mid-level fusion 與食品認證模型驗證。</p><div class="facts"><div class="fact"><b>57</b><span>olive oils</span></div><div class="fact"><b>4</b><span>data blocks</span></div><div class="fact"><b>Fusion</b><span>low / mid level</span></div><div class="fact"><b>CV</b><span>overfitting control</span></div></div></header>
+<main>
+<section id="goal"><span class="kicker">Level 3 · 進階</span><h2>Olive Oil Multi-block：多儀器資料融合與食品認證</h2><p class="lead">這一章使用 Olive oils multi-block dataset。你不再只看一種 NIR 光譜，而是同時處理 UV–vis、NIR、e-tongue、e-nose 等多個資料 block，用 data fusion 做 PDO / 產地或真偽認證。</p><div class="grid g3"><div class="card"><h4>樣本</h4><div class="big">57</div><p>橄欖油樣本，用於 Chianti Classico PDO authentication。</p></div><div class="card"><h4>資料 blocks</h4><div class="big">4</div><p>UV–vis、NIR、e-tongue、e-nose。</p></div><div class="card coral"><h4>核心挑戰</h4><div class="big">small n, large p</div><p>樣本少、變數多，必須嚴格驗證避免 overfitting。</p></div></div><p><span class="badge">multi-block</span><span class="badge">block scaling</span><span class="badge">low-level fusion</span><span class="badge">mid-level fusion</span></p></section>
+<section id="blocks"><span class="kicker">Multi-block data</span><h2>真實食品認證常常不是單一儀器能完成</h2><p>入門與中階的資料都是單一矩陣 <code>X</code>；進階資料變成多個 blocks。每個 block 描述食品的不同面向：光學吸收、揮發性氣味、味覺感測或其他化學指紋。</p><table><tr><th>Block</th><th>變數數</th><th>可能提供的資訊</th></tr><tr><td>UV–vis</td><td>441</td><td>色素、氧化與吸收特徵</td></tr><tr><td>NIR</td><td>1126</td><td>油脂、O–H / C–H 相關吸收</td></tr><tr><td>e-tongue</td><td>3945</td><td>味覺 / 電化學指紋</td></tr><tr><td>e-nose</td><td>46</td><td>揮發性氣味指紋</td></tr></table><div class="callout"><span class="tag">進階核心問題：</span>把 blocks 合在一起後，模型變好是因為資訊互補，還是只是因為變數變多導致 overfitting？</div></section>
+<section id="single"><span class="kicker">先別急著融合</span><h2>先分開分析每個 block</h2><p class="lead">進階分析的第一步不是把所有變數直接合併，而是先理解每個 block 自己能提供多少分類資訊。</p><pre><code class="language-python">blocks = {
+    "uvvis": X_uvvis,
+    "nir": X_nir,
+    "enose": X_enose,
+    "etongue": X_etongue,
+}
+
+for name, Xb in blocks.items():
+    Xbs = StandardScaler().fit_transform(Xb)
+    T = PCA(n_components=2).fit_transform(Xbs)
+    # plot T[:,0], T[:,1], colored by PDO / non-PDO
+</code></pre><table><tr><th>你要比較</th><th>問題</th></tr><tr><td>PCA 分群</td><td>哪個 block 最能自然分開類別？</td></tr><tr><td>單一 block 分類</td><td>NIR only、e-nose only、e-tongue only 哪個表現最好？</td></tr><tr><td>變數數量</td><td>變數多的 block 是否容易 overfit？</td></tr></table></section>
+<section id="scaling"><span class="kicker">Block Scaling</span><h2>不同 blocks 變數數量差很多，不能直接粗暴合併</h2><p>如果直接把 3945 個 e-tongue 變數和 46 個 e-nose 變數合併，變數多的 block 可能主導模型。Block scaling 的目的是讓每個 block 在融合前有比較公平的權重。</p><div class="eq">\[ X_b^{scaled}=\frac{autoscale(X_b)}{\lVert autoscale(X_b)\rVert_F} \]</div><pre><code class="language-python">import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+def block_scale(X):
+    Xs = StandardScaler().fit_transform(X)
+    norm = np.linalg.norm(Xs, ord="fro")
+    return Xs / norm if norm > 0 else Xs
+
+scaled_blocks = {name: block_scale(Xb) for name, Xb in blocks.items()}</code></pre></section>
+<section id="fusion"><span class="kicker">Data Fusion</span><h2>Low-level fusion vs Mid-level fusion</h2><div class="grid g2"><div class="card"><h4>Low-level fusion</h4><p>先前處理與 block scaling，再直接合併所有原始變數。</p><pre><code class="language-python">X_low = np.hstack([
+    scaled_blocks["uvvis"],
+    scaled_blocks["nir"],
+    scaled_blocks["enose"],
+    scaled_blocks["etongue"],
+])</code></pre></div><div class="card coral"><h4>Mid-level fusion</h4><p>每個 block 先 PCA 降維，再合併各 block 的 scores。</p><pre><code class="language-python">from sklearn.decomposition import PCA
+
+scores = []
+for name, Xb in scaled_blocks.items():
+    Tb = PCA(n_components=5).fit_transform(Xb)
+    scores.append(Tb)
+X_mid = np.hstack(scores)</code></pre></div></div><table><tr><th>融合方式</th><th>優點</th><th>風險</th></tr><tr><td>Low-level</td><td>保留最多原始資訊，概念簡單</td><td>維度非常高，容易 overfit</td></tr><tr><td>Mid-level</td><td>降維後更穩定，適合小樣本</td><td>PCA 可能丟掉和分類有關但變異小的訊號</td></tr></table></section>
+<section id="validation"><span class="kicker">Validation</span><h2>進階課最重要的是誠實驗證</h2><p class="lead">Multi-block 資料通常樣本少、變數多。任何前處理、PCA、特徵選擇都必須放在 cross-validation 的訓練折內，否則測試表現會被高估。</p><pre><code class="language-python">from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+model = Pipeline([
+    ("scaler", StandardScaler()),
+    ("svm", SVC(kernel="linear", C=1))
+])
+scores = cross_val_score(model, X_mid, y_class, cv=cv, scoring="balanced_accuracy")
+print(scores.mean(), scores.std())</code></pre><div class="callout coral"><span class="tag">警告：</span>如果你先用全部資料做 PCA 或變數選擇，再切 cross-validation，這是 data leakage。進階 chemometrics 的關鍵不是模型多複雜，而是驗證是否誠實。</div></section>
+<section id="compare"><span class="kicker">比較與解釋</span><h2>最後要回答：融合是否真的有幫助？</h2><table><tr><th>模型</th><th>輸入</th><th>要報告</th></tr><tr><td>NIR only</td><td>NIR block</td><td>balanced accuracy、confusion matrix</td></tr><tr><td>e-nose only</td><td>e-nose block</td><td>是否提供互補氣味資訊</td></tr><tr><td>Low-level fusion</td><td>所有 block 原始變數</td><td>是否提升，是否過擬合</td></tr><tr><td>Mid-level fusion</td><td>各 block PCA scores</td><td>是否較穩定、較可解釋</td></tr></table><p>如果 fusion 只比最佳 single-block 好一點點，而且變異很大，不能直接宣稱融合比較好。你需要用 repeated CV、外部測試集或 permutation test 支持結論。</p></section>
+<section id="orange"><span class="kicker">Orange</span><h2>Orange 建議從 Python 輸出的 fusion CSV 開始</h2><pre class="flow"><code>Python:
+  read blocks → autoscale → block scaling
+  → PCA per block for mid-level fusion
+  → export olive_oil_midlevel_fusion.csv
+
+Orange:
+File → Select Columns
+     → PCA / Scatter Plot
+     → Test and Score ← SVM / Random Forest / Logistic Regression
+     → Confusion Matrix</code></pre><div class="callout"><span class="tag">本章完成標準：</span>你應該能比較 single-block、low-level fusion、mid-level fusion，並清楚說明 fusion 是否真的改善食品認證，而不是只報告最高 accuracy。</div></section>
+<section id="finish"><span class="kicker">三階段完成</span><h2>你已完成從成分定量到資料融合的學習路徑</h2><p>這三個頁面形成一條完整路徑：Tecator 肉品成分預測 → Coffee–Barley 摻偽分析 → Olive Oil 多儀器融合認證。</p><div class="btnrow"><a class="btn" href="beginner-tecator.html">入門</a><a class="btn" href="intermediate-coffee-barley.html">中階</a><a class="btn coral" href="teaching.html">回總覽</a></div></section>
+</main>
+<footer><p><b>進階：Olive Oil Multi-block — Data Fusion 食品認證</b></p><p>近紅外光譜 × 食品分析化學計量學 · Python + Orange Data Mining</p></footer>
+<script>window.addEventListener('DOMContentLoaded',()=>{if(window.hljs)hljs.highlightAll();if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\[',right:'\]',display:true},{left:'$',right:'$',display:false},{left:'\(',right:'\)',display:false}]});}});</script>
+</body></html>

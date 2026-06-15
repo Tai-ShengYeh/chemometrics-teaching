@@ -124,6 +124,10 @@ footer b{color:var(--gold);}
   <a href="#pls">PLS</a>
   <a href="#python">Python</a>
   <a href="#orange">Orange</a>
+  <a href="#learning-path">三階段</a>
+  <a href="beginner-tecator.html">入門</a>
+  <a href="intermediate-coffee-barley.html">中階</a>
+  <a href="advanced-data-fusion.html">進階</a>
   <a href="#summary">總結</a>
 </nav>
 
@@ -420,6 +424,33 @@ python 03_pls.py          # 選 LV / 預測 vs 真實 / 係數
   <div class="btnrow">
     <a class="btn" href="orange/nir_tecator_workflow.ows">⬇ 下載 .ows 工作流程</a>
     <a class="btn coral" href="orange/ORANGE_GUIDE.md">📖 Orange 圖解步驟指南</a>
+  </div>
+</section>
+
+<!-- ===== LEARNING PATH ===== -->
+<section id="learning-path">
+  <span class="kicker">三階段學習路徑</span>
+  <h2>依資料難度分成三個獨立頁面</h2>
+  <p class="lead">你可以先用本頁的 Tecator 教學建立 PCA / PLS 基礎，再依照食品問題的複雜度進入三個獨立學習頁面。每一頁都包含資料集背景、Python 分析骨架與 Orange Data Mining workflow。</p>
+  <div class="grid g3">
+    <div class="card">
+      <h4>入門：Tecator 肉品 NIR</h4>
+      <p>用 240 個肉品樣本學習 SNV、PCA score/loading 與 PLS 脂肪含量預測。</p>
+      <p><b>適合：</b>第一次接觸 chemometrics 的學生。</p>
+      <div class="btnrow"><a class="btn" href="beginner-tecator.html">開啟入門頁 →</a></div>
+    </div>
+    <div class="card">
+      <h4>中階：Coffee–Barley 摻偽</h4>
+      <p>用 NIR 光譜做食品真偽分析：PLS-DA 判斷是否摻偽，PLS regression 預測 barley percentage。</p>
+      <p><b>適合：</b>已理解 PCA / PLS，想進入 classification 與 authenticity 的學生。</p>
+      <div class="btnrow"><a class="btn" href="intermediate-coffee-barley.html">開啟中階頁 →</a></div>
+    </div>
+    <div class="card coral">
+      <h4>進階：Olive Oil Data Fusion</h4>
+      <p>用 UV–vis、NIR、e-tongue、e-nose 多資料 blocks 學習 block scaling、low-/mid-level fusion 與嚴格驗證。</p>
+      <p><b>適合：</b>想理解 multi-block chemometrics 與 overfitting 控制的學生。</p>
+      <div class="btnrow"><a class="btn coral" href="advanced-data-fusion.html">開啟進階頁 →</a></div>
+    </div>
   </div>
 </section>
 
