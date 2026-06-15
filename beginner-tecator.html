@@ -23,7 +23,7 @@ pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;
 </style>
 </head>
 <body>
-<nav><span class="brand">NIR × 食品分析 <b>·</b> 入門 · Tecator</span><a href="teaching.html">總覽</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a></nav>
+<nav><span class="brand">NIR × 食品分析 <b>·</b> 入門 · Tecator</span><a href="./">課程入口</a><a href="teaching.html">總覽</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a></nav>
 <header class="hero"><h1>入門：肉品 NIR <span class="accent">PCA + PLS</span></h1><p class="sub">用 Tecator 肉品資料建立近紅外光譜化學計量學的第一個完整流程：SNV 前處理、PCA 探索、PLS 預測脂肪含量。</p><div class="facts"><div class="fact"><b>240</b><span>meat samples</span></div><div class="fact"><b>100</b><span>NIR wavelengths</span></div><div class="fact"><b>SNV</b><span>scatter correction</span></div><div class="fact"><b>PLS</b><span>fat prediction</span></div></div></header>
 <main>
 <section id="goal"><span class="kicker">Level 1 · 入門</span><h2>Tecator 肉品 NIR：從光譜到脂肪含量</h2><p class="lead">這一章使用經典 Tecator meat NIR dataset。你的任務是把 240 個肉品樣本的近紅外光譜轉成可解釋的 PCA 圖，並用 PLS regression 預測脂肪含量。</p><div class="grid g3"><div class="card"><h4>資料矩陣</h4><div class="big">240 × 100</div><p>240 個樣本，每個樣本 100 個波長吸光值。</p></div><div class="card"><h4>目標 y</h4><div class="big">fat %</div><p>以濕化學測得的脂肪含量作為 PLS 預測目標。</p></div><div class="card coral"><h4>核心方法</h4><div class="big">PCA + PLS</div><p>PCA 看結構，PLS 做定量預測。</p></div></div><p><span class="badge">OpenML id 505</span><span class="badge">NIR spectra</span><span class="badge">SNV</span><span class="badge">PLS regression</span></p></section>
@@ -66,7 +66,7 @@ print("R2CV", r2_score(y_fat, y_cv))</code></pre><div class="callout coral"><spa
     ← Random Forest Regression
 → Predictions
 → Scatter Plot: measured fat vs predicted fat</code></pre></section>
-<section id="next"><span class="kicker">下一步</span><h2>進入食品真偽問題</h2><p>如果你已經理解 Tecator 的 PCA 與 PLS，下一章會把 NIR 從「成分預測」推進到「食品摻偽鑑別」：咖啡是否摻 barley？摻了多少？</p><div class="btnrow"><a class="btn coral" href="intermediate-coffee-barley.html">前往中階：Coffee–Barley NIR →</a></div></section>
+<section id="next"><span class="kicker">下一步</span><h2>進入食品真偽問題</h2><p>如果你已經理解 Tecator 的 PCA 與 PLS，下一章會把 NIR 從「成分預測」推進到「食品摻偽鑑別」：咖啡是否摻 barley？摻了多少？</p><div class="btnrow"><a class="btn" href="./">回課程入口</a><a class="btn coral" href="intermediate-coffee-barley.html">前往中階：Coffee–Barley NIR →</a></div></section>
 </main>
 <footer><p><b>入門：Tecator 肉品 NIR — PCA 與 PLS</b></p><p>近紅外光譜 × 食品分析化學計量學 · Python + Orange Data Mining</p></footer>
 <script>window.addEventListener('DOMContentLoaded',()=>{if(window.hljs)hljs.highlightAll();if(window.renderMathInElement){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\[',right:'\]',display:true},{left:'$',right:'$',display:false},{left:'\(',right:'\)',display:false}]});}});</script>
