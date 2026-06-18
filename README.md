@@ -24,8 +24,9 @@ Four sibling courses, same teaching pipeline (interactive page + Python + Orange
 |------|------|
 | `teaching.html` | Single-page course: NIR intro → dataset → **PCA** → **PLS** → Python code → Orange → summary |
 | `python/` | Runnable analysis — `01_data_prep.py`, `02_pca.py`, `03_pls.py`, `04_sugar_pca.py` + `figures/` |
-| `data/` | Tecator dataset (`tecator.csv`, `tecator_orange.tab`) |
-| `orange/` | Orange Data Mining workflow (`nir_tecator_workflow.ows`) + illustrated guide |
+| `notebooks/` | Downloadable / Colab Jupyter notebook (`01_beginner_tecator.ipynb`) + generator |
+| `data/` | Tecator (`tecator.csv`, `tecator_orange.tab`) + five-sugar (`five_sugar.csv`, `five_sugar.tab`) |
+| `orange/` | Orange workflows (`tecator_pca.ows`, `tecator_pls.ows`, `sugar_pca.ows`, `sugar_plsda.ows`) + illustrated guide |
 | `videos/*/renders/*.mp4` | Narrated teaching videos — PCA, PLS, and PCA × Orange (sugar NIR) |
 
 ## Data & credits

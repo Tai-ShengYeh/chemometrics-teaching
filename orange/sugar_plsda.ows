@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Five-Sugar NIR — supervised classification (PLS-DA alternative)" description="Supervised classification of the five sugars by NIR. Load data/five_sugar.tab (sugar_group is the class). Three classifiers are compared in Test and Score (cross-validation), then the Confusion Matrix shows which sugars get confused. NOTE: Orange has no built-in PLS-DA widget (its PLS widget is regression-only); for a true PLS-DA use the Python notebook. This workflow gives the equivalent supervised-classification result with built-in widgets.">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — five_sugar.tab" position="(80.0, 280.0)" />
+		<node id="1" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Data Table" position="(320.0, 120.0)" />
+		<node id="2" name="Logistic Regression" qualified_name="Orange.widgets.model.owlogisticregression.OWLogisticRegression" project_name="Orange3" version="" title="Logistic Regression" position="(320.0, 250.0)" />
+		<node id="3" name="SVM" qualified_name="Orange.widgets.model.owsvm.OWSVM" project_name="Orange3" version="" title="SVM" position="(320.0, 350.0)" />
+		<node id="4" name="Random Forest" qualified_name="Orange.widgets.model.owrandomforest.OWRandomForest" project_name="Orange3" version="" title="Random Forest" position="(320.0, 450.0)" />
+		<node id="5" name="Test and Score" qualified_name="Orange.widgets.evaluate.owtestandscore.OWTestAndScore" project_name="Orange3" version="" title="Test and Score (cross-validation)" position="(580.0, 350.0)" />
+		<node id="6" name="Confusion Matrix" qualified_name="Orange.widgets.evaluate.owconfusionmatrix.OWConfusionMatrix" project_name="Orange3" version="" title="Confusion Matrix" position="(820.0, 350.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="0" sink_node_id="5" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="train_data" />
+		<link id="2" source_node_id="2" sink_node_id="5" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="3" source_node_id="3" sink_node_id="5" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="4" source_node_id="4" sink_node_id="5" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="5" source_node_id="5" sink_node_id="6" source_channel="Evaluation Results" sink_channel="Evaluation Results" enabled="true" source_channel_id="evaluations_results" sink_channel_id="evaluation_results" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 540.0, 560.0, 110.0)" font-family="Helvetica" font-size="13">第一步：雙擊 File → Browse 到 data/five_sugar.tab（sugar_group 已是 class）。
+Test and Score 內選 Cross validation；比較三個分類器的正確率。
+Confusion Matrix 看哪兩種糖最容易互相誤判。
+註：Orange 無內建 PLS-DA widget（PLS 只做迴歸）；要真正的 PLS-DA 請用 Python notebook。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties>
+	</node_properties>
+</scheme>

@@ -2,7 +2,7 @@
 
 > 給課堂用的「不寫程式」版本。學生用拖拉式 widget，重現 Python 影片裡的 PCA 與 PLS 結果。
 > 資料：`../data/tecator.csv`（240 肉品樣本 × 100 波長 + moisture/fat/protein）。
-> 一鍵開檔：`nir_tecator_workflow.ows`（已含 8 個 widget、9 條連線）。
+> 兩個工作流程（已拆開）：`tecator_pca.ows`（PCA 探索）、`tecator_pls.ows`（PLS 預測脂肪）。另有五種糖範例 `sugar_pca.ows` / `sugar_plsda.ows`（見文末 Part 7）。
 > Orange 版本：3.40（PLS widget 為內建，無需額外 add-on）。
 
 ---
@@ -34,7 +34,7 @@
 
 ## Part 2 ｜ 開啟現成工作流程
 
-`File ▸ Open` 選 `nir_tecator_workflow.ows`。會看到兩條分支：
+`File ▸ Open` 選 `tecator_pca.ows`（PCA）或 `tecator_pls.ows`（PLS）。兩個檔合起來就是下面這張圖的兩條分支（開啟後第一步都要雙擊 File → Browse 到資料）：
 
 ```
                 ┌──────────────┐
@@ -127,6 +127,20 @@
 | PLS / Test&Score 灰掉沒反應 | File 沒設 `fat` 為 target（回歸需要數值目標） |
 | 找不到 PLS widget | 確認 Orange ≥ 3.34；`Options ▸ Add-ons` 更新 Orange3 |
 | 開 .ows 後 widget 紅框 | File 還沒指定檔案路徑：雙擊 File 重新 Browse 到 `tecator.csv` |
-| Scatter Plot 沒有 PC1/PC2 選項 | 確認連的是 PCA 的 **Transformed Data**（不是原始 Data） |
+| Scatter Plot 沒有 PC1/PC2 選項 | 確認連的是 PCA 的 **Data** 輸出（同時含 PC 欄位與 target，所以能畫 PC1/PC2 又能依 fat/sugar 上色） |
+| Score Plot 無法依類別上色 | 不要接 **Transformed Data**（只有 PC、丟了 target）；改接 PCA 的 **Data** 輸出 |
 | Test&Score 數字和 Python 略不同 | 隨機切分 / 折數不同所致，量級一致即可（R² 都在 0.95+） |
 | 中文路徑載入失敗 | 把 `tecator.csv` 複製到純英文路徑再 Browse |
+
+---
+
+## Part 7 ｜ 另一個範例：五種糖 NIR（對應 Yeh 2025 JCE 論文）
+
+把近紅外用在五種白糖（fructose / glucose / lactose / maltose / sucrose）的分群與分類。資料 `../data/five_sugar.tab`（25 樣本 × 228 波長，`sugar_group` 已設為 class、`ID` 為 meta）。
+
+| 檔案 | 做什麼 | 注意 |
+|------|--------|------|
+| `sugar_pca.ows` | File → Spectra（原始光譜）；File → PCA；PCA **Data** → Score Plot（依 `sugar_group` 上色，五種糖分群）；PCA **Components** → Spectra（loadings 看 O–H 帶） | 用到 **Orange-Spectroscopy add-on**：`Options ▸ Add-ons` 勾 *Spectroscopy* 安裝（才有 Spectra widget） |
+| `sugar_plsda.ows` | File → Test and Score ← Logistic Regression / SVM / Random Forest（交叉驗證）→ Confusion Matrix | Orange **沒有內建 PLS-DA widget**（PLS widget 只做迴歸）。此檔用分類器做等效的監督式分類；要真正的 **PLS-DA** 請用 Python notebook |
+
+> 為什麼 PLS 範例用 Tecator、分類範例用糖？因為 Orange 的 PLS widget 是**迴歸**（連續目標，如 Tecator 的 fat）；糖是**類別**目標，適合分類器或 Python 的 PLS-DA。

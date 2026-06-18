@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Tecator NIR — PLS regression" description="PLS regression predicting fat (%) from the Tecator meat NIR spectra. Load data/tecator_orange.tab (fat is the numeric target). PLS 'Learner' goes to Test and Score (cross-validation R2/RMSE); PLS 'Model' + the data go to Predictions, whose output is plotted as predicted-vs-measured fat. Uses only built-in Orange widgets (PLS is built in since Orange 3.34).">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — tecator_orange.tab" position="(80.0, 300.0)" />
+		<node id="1" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Data Table" position="(320.0, 130.0)" />
+		<node id="2" name="PLS" qualified_name="Orange.widgets.model.owpls.OWPLS" project_name="Orange3" version="" title="PLS" position="(320.0, 330.0)" />
+		<node id="3" name="Test and Score" qualified_name="Orange.widgets.evaluate.owtestandscore.OWTestAndScore" project_name="Orange3" version="" title="Test and Score (CV: R2 / RMSE)" position="(580.0, 240.0)" />
+		<node id="4" name="Predictions" qualified_name="Orange.widgets.evaluate.owpredictions.OWPredictions" project_name="Orange3" version="" title="Predictions" position="(580.0, 440.0)" />
+		<node id="5" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="Predicted vs measured fat" position="(840.0, 440.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="0" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="2" sink_node_id="3" source_channel="Learner" sink_channel="Learner" enabled="true" source_channel_id="learner" sink_channel_id="learner" />
+		<link id="3" source_node_id="0" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="train_data" />
+		<link id="4" source_node_id="2" sink_node_id="4" source_channel="Model" sink_channel="Predictors" enabled="true" source_channel_id="model" sink_channel_id="predictors" />
+		<link id="5" source_node_id="0" sink_node_id="4" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="6" source_node_id="4" sink_node_id="5" source_channel="Predictions" sink_channel="Data" enabled="true" source_channel_id="annotated" sink_channel_id="data" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 540.0, 560.0, 110.0)" font-family="Helvetica" font-size="13">第一步：雙擊 File → Browse 到 data/tecator_orange.tab（fat 已是 target）。
+PLS 內設 Components（潛在變量數，例如 ~6）。
+Test and Score 選 Cross validation → 看 R² / RMSE。
+Predictions → Scatter Plot：x = fat（真實）、y = PLS（預測），點貼對角線越好。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties>
+	</node_properties>
+</scheme>

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Tecator NIR — PCA" description="PCA exploration of the Tecator meat NIR dataset. Load data/tecator_orange.tab (fat is already the target). PCA 'Data' output keeps fat so the score plot can colour by fat; PCA 'Components' is shown as loadings vs wavelength in a Line Plot. Uses only built-in Orange widgets — no add-on required.">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — tecator_orange.tab" position="(80.0, 230.0)" />
+		<node id="1" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Data Table" position="(320.0, 110.0)" />
+		<node id="2" name="PCA" qualified_name="Orange.widgets.unsupervised.owpca.OWPCA" project_name="Orange3" version="" title="PCA" position="(320.0, 300.0)" />
+		<node id="3" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="Score Plot — PC1 vs PC2 (color = fat)" position="(580.0, 210.0)" />
+		<node id="4" name="Line Plot" qualified_name="Orange.widgets.visualize.owlineplot.OWLinePlot" project_name="Orange3" version="" title="Loadings vs wavelength" position="(580.0, 390.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="0" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="2" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="2" sink_node_id="4" source_channel="Components" sink_channel="Data" enabled="true" source_channel_id="components" sink_channel_id="data" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 470.0, 520.0, 96.0)" font-family="Helvetica" font-size="13">第一步：雙擊 File → Browse 到 data/tecator_orange.tab（fat 已是 target）。
+Score Plot 接 PCA 的「Data」輸出（保留 fat → 可依脂肪上色）。
+Components → Line Plot 看 loadings vs 波長（~930 nm C–H 帶）。
+全部用 Orange 內建 widget，免裝 add-on。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties>
+	</node_properties>
+</scheme>

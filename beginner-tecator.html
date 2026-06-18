@@ -27,19 +27,27 @@ pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;
 <header class="hero"><h1>入門：肉品 NIR <span class="accent">PCA + PLS</span></h1><p class="sub">用 Tecator 肉品資料建立近紅外光譜化學計量學的第一個完整流程：SNV 前處理、PCA 探索、PLS 預測脂肪含量。</p><div class="facts"><div class="fact"><b>240</b><span>meat samples</span></div><div class="fact"><b>100</b><span>NIR wavelengths</span></div><div class="fact"><b>SNV</b><span>scatter correction</span></div><div class="fact"><b>PLS</b><span>fat prediction</span></div></div></header>
 <main>
 <section id="goal"><span class="kicker">Level 1 · 入門</span><h2>Tecator 肉品 NIR：從光譜到脂肪含量</h2><p class="lead">這一章使用經典 Tecator meat NIR dataset。你的任務是把 240 個肉品樣本的近紅外光譜轉成可解釋的 PCA 圖，並用 PLS regression 預測脂肪含量。</p><div class="grid g3"><div class="card"><h4>資料矩陣</h4><div class="big">240 × 100</div><p>240 個樣本，每個樣本 100 個波長吸光值。</p></div><div class="card"><h4>目標 y</h4><div class="big">fat %</div><p>以濕化學測得的脂肪含量作為 PLS 預測目標。</p></div><div class="card coral"><h4>核心方法</h4><div class="big">PCA + PLS</div><p>PCA 看結構，PLS 做定量預測。</p></div></div><p><span class="badge">OpenML id 505</span><span class="badge">NIR spectra</span><span class="badge">SNV</span><span class="badge">PLS regression</span></p></section>
+<section id="run"><span class="kicker">怎麼執行 · How to run</span><h2>兩種方式：雲端 Colab（零安裝）或本機 Python</h2><p class="lead">這一章的 Python 全部整理成一個 Jupyter notebook。最推薦用 <b>Google Colab</b>：只要瀏覽器和 Google 帳號就能跑，<b>完全不用安裝任何東西</b>，連手機、平板都能開。</p>
+<div class="grid g2">
+<div class="card"><h4>① 雲端執行（建議）</h4><p>點按鈕在 Google Colab 開啟，選「執行階段 ▸ 全部執行」即可。<code>scikit-learn / pandas / matplotlib</code> 都已預裝，資料自動從線上讀取——<b>零安裝、零下載</b>。</p><div class="btnrow"><a href="https://colab.research.google.com/github/Tai-ShengYeh/chemometrics-teaching/blob/main/notebooks/01_beginner_tecator.ipynb" target="_blank" rel="noopener"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" style="height:34px;border:0;border-radius:6px"></a></div></div>
+<div class="card"><h4>② 本機執行</h4><p>下載 notebook 與資料，用自己的 Jupyter / VS Code 開。需先安裝一次：<code>pip install numpy pandas scikit-learn scipy matplotlib</code>。</p><div class="btnrow"><a class="btn" href="notebooks/01_beginner_tecator.ipynb" download>⬇ 下載 Notebook（.ipynb）</a><a class="btn" href="data/tecator.csv" download>⬇ 下載資料（tecator.csv）</a></div></div>
+</div>
+<div class="callout"><span class="tag">沒有電腦也沒關係：</span>Colab 在瀏覽器裡執行，手機或平板都能開、能跑，<b>不需安裝任何程式</b>。這就是為什麼建議先用 Colab，而不是一開始就要大家自己裝 Python 或 Orange——把安裝的門檻留到真的需要時再處理。</div></section>
 <section id="data"><span class="kicker">資料怎麼讀</span><h2>X 是光譜，y 是成分真值</h2><p>每一列是一個肉品樣本；每一欄是 850–1050 nm 的吸光值。這種資料很適合入門，因為樣本數不大、光譜乾淨、脂肪含量和 NIR 的 C–H 吸收有明確關係。</p><table><tr><th>欄位</th><th>意思</th><th>本章用途</th></tr><tr><td><code>absorbance_1 ... absorbance_100</code></td><td>NIR 吸光值</td><td>輸入矩陣 <code>X</code></td></tr><tr><td><code>moisture</code></td><td>水分 %</td><td>備用目標</td></tr><tr><td><code>fat</code></td><td>脂肪 %</td><td><b>主要預測目標 y</b></td></tr><tr><td><code>protein</code></td><td>蛋白質 %</td><td>備用目標</td></tr></table><div class="callout"><span class="tag">先建立直覺：</span>NIR 光譜不是單一峰對單一成分；脂肪、水分、蛋白質訊號高度重疊，所以需要 PCA / PLS 這類多變量方法。</div></section>
 <section id="preprocess"><span class="kicker">前處理</span><h2>SNV：先降低散射與基線差異</h2><p class="lead">肉品樣本的顆粒大小、表面狀態與量測距離會造成散射差異。SNV 會對每一條光譜各自標準化，讓模型更專注於化學差異。</p><pre><code class="language-python">def snv(X):
     """Standard Normal Variate: row-wise scatter correction."""
     mu = X.mean(axis=1, keepdims=True)
     sd = X.std(axis=1, keepdims=True)
-    return (X - mu) / sd</code></pre><p>SNV 是逐樣本處理，和 autoscaling 逐變數處理不同。入門階段先比較 raw spectra 與 SNV spectra 的 PCA / PLS 結果。</p></section>
+    return (X - mu) / sd</code></pre><p>SNV 是逐樣本處理，和 autoscaling 逐變數處理不同。入門階段先比較 raw spectra 與 SNV spectra 的 PCA / PLS 結果。</p>
+<div class="grid g2"><figure><img src="python/figures/fig01_raw_spectra.png" alt="Tecator 原始 NIR 光譜（依脂肪上色）"><figcaption>前處理<b>前</b>：原始光譜整條上下漂移，基線受散射主導。</figcaption></figure><figure><img src="python/figures/fig02_snv_spectra.png" alt="SNV 校正後的 NIR 光譜"><figcaption>前處理<b>後</b>（SNV）：每條光譜各自標準化，基線對齊、形狀更一致，化學差異更突出。</figcaption></figure></div></section>
 <section id="pca"><span class="kicker">PCA</span><h2>先看脂肪含量是否沿主成分呈現梯度</h2><p>做 PCA 時不使用 <code>fat</code> 當輸入，但可以用 fat 幫 score plot 上色。若樣本沿 PC1 或 PC2 出現由低脂到高脂的連續梯度，代表光譜中的主要變異和成分差異有關。</p><pre><code class="language-python">from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 Xs = snv(X)
 Xp = StandardScaler().fit_transform(Xs)
 pca = PCA(n_components=5).fit(Xp)
-T = pca.transform(Xp)</code></pre><table><tr><th>圖</th><th>你要看什麼</th></tr><tr><td>PCA score plot</td><td>樣本是否依脂肪含量呈現梯度？是否有 outlier？</td></tr><tr><td>PCA loading plot</td><td>哪些波長推動 PC1 / PC2？是否可能和 C–H、O–H 吸收有關？</td></tr><tr><td>Scree plot</td><td>前幾個 PC 解釋多少變異？</td></tr></table></section>
+T = pca.transform(Xp)</code></pre><table><tr><th>圖</th><th>你要看什麼</th></tr><tr><td>PCA score plot</td><td>樣本是否依脂肪含量呈現梯度？是否有 outlier？</td></tr><tr><td>PCA loading plot</td><td>哪些波長推動 PC1 / PC2？是否可能和 C–H、O–H 吸收有關？</td></tr><tr><td>Scree plot</td><td>前幾個 PC 解釋多少變異？</td></tr></table>
+<div class="grid g3"><figure><img src="python/figures/fig03_pca_scree.png" alt="PCA scree plot"><figcaption>Scree：前 3 個主成分就解釋幾乎全部變異。</figcaption></figure><figure><img src="python/figures/fig04_pca_scores.png" alt="PCA 分數圖，依脂肪上色"><figcaption>分數圖（依脂肪上色）：樣本沿主成分由低脂到高脂連續排列。</figcaption></figure><figure><img src="python/figures/fig05_pca_loadings.png" alt="PCA 負荷量 vs 波長"><figcaption>負荷量：~930 nm 的 C–H（脂肪）吸收帶推動主成分。</figcaption></figure></div></section>
 <section id="pls"><span class="kicker">PLS Regression</span><h2>用整條 NIR 光譜預測脂肪含量</h2><p class="lead">PLS 會找出同時描述 X 光譜與 y 脂肪含量的 latent variables。它比單波長回歸更適合 NIR，因為 NIR 訊號高度重疊且變數彼此相關。</p><pre><code class="language-python">from sklearn.cross_decomposition import PLSRegression
 from sklearn.model_selection import KFold, cross_val_predict
 from sklearn.pipeline import Pipeline
@@ -52,20 +60,24 @@ model = Pipeline([
 ])
 y_cv = cross_val_predict(model, snv(X), y_fat, cv=cv).ravel()
 print("RMSECV", mean_squared_error(y_fat, y_cv, squared=False))
-print("R2CV", r2_score(y_fat, y_cv))</code></pre><div class="callout coral"><span class="tag">本章完成標準：</span>你應該能產生 raw spectra、SNV spectra、PCA score/loading、PLS measured vs predicted，並用 R² / RMSE 說明模型好壞。</div></section>
-<section id="orange"><span class="kicker">Orange</span><h2>Orange workflow</h2><pre class="flow"><code>File
-→ Select Columns
-    Features: absorbance_1 ... absorbance_100
-    Target: fat
-    Meta: moisture, protein
-→ Preprocess
+print("R2CV", r2_score(y_fat, y_cv))</code></pre>
+<div class="grid g3"><figure><img src="python/figures/fig06_pls_rmsecv.png" alt="RMSECV vs 潛在變量數"><figcaption>用交叉驗證挑潛在變量數：誤差在轉折點後不再明顯下降，不是越多越好。</figcaption></figure><figure><img src="python/figures/fig07_pls_pred_vs_meas.png" alt="PLS 預測 vs 真實脂肪"><figcaption>預測 vs 真實：點緊貼 1:1 對角線，R² / RMSEP 量化模型表現。</figcaption></figure><figure><img src="python/figures/fig08_pls_coef.png" alt="PLS 回歸係數 vs 波長"><figcaption>回歸係數：模型「看」哪些波長預測脂肪——對應 C–H 吸收帶。</figcaption></figure></div>
+<div class="callout coral"><span class="tag">本章完成標準：</span>你應該能產生 raw spectra、SNV spectra、PCA score/loading、PLS measured vs predicted，並用 R² / RMSE 說明模型好壞。</div></section>
+<section id="orange"><span class="kicker">Orange · 不用寫程式</span><h2>用 Orange Data Mining 拖一遍同樣的流程</h2><p class="lead">不想寫 Python？Orange 是拖拉式（visual programming）工具。這裡把 <b>PCA</b> 與 <b>PLS</b> 拆成兩個獨立工作流程，載入對應的 <code>.tab</code>（target 已設好）即可直接跑。</p>
+<figure><img src="python/figures/jce/orange_workflow.png" alt="Orange workflow 示意"><figcaption>Orange 工作流程示意：File 載入資料 → PCA / PLS → 用 Scatter Plot、Test &amp; Score 檢視結果。</figcaption></figure>
+<div class="grid g2">
+<div class="card"><h4>① PCA 工作流程</h4><p>關鍵：Score Plot 接 PCA 的 <b>Data</b> 輸出（保留 target → 可上色）；Components 接 Line Plot 看 loadings。</p><pre class="flow"><code>File（tecator_orange.tab）
 → PCA
-→ Scatter Plot
-→ Test and Score
-    ← Linear Regression
-    ← Random Forest Regression
-→ Predictions
-→ Scatter Plot: measured fat vs predicted fat</code></pre></section>
+  ├ Data ──────▶ Scatter Plot（PC1×PC2, Color=fat）
+  └ Components ─▶ Line Plot（loadings vs 波長）</code></pre><div class="btnrow"><a class="btn" href="orange/tecator_pca.ows" download>⬇ Tecator PCA（.ows）</a></div></div>
+<div class="card coral"><h4>② PLS 工作流程</h4><p>Learner → Test and Score（交叉驗證 R²/RMSE）；Model + Data → Predictions → Scatter（預測 vs 真實）。</p><pre class="flow"><code>File（tecator_orange.tab）
+→ PLS
+  ├ Learner ▶ Test and Score（R²/RMSE）
+  └ Model ──▶ Predictions ▶ Scatter（pred vs fat）</code></pre><div class="btnrow"><a class="btn coral" href="orange/tecator_pls.ows" download>⬇ Tecator PLS（.ows）</a></div></div>
+</div>
+<div class="btnrow"><a class="btn" href="data/tecator_orange.tab" download>⬇ Tecator 資料（.tab）</a><a class="btn coral" href="https://github.com/Tai-ShengYeh/chemometrics-teaching/blob/main/orange/ORANGE_GUIDE.md" target="_blank" rel="noopener">📖 Orange 圖文教學</a></div>
+<div class="callout"><span class="tag">另一個範例（五種糖 NIR · 對應 JCE 論文）：</span>用近紅外把五種白糖（果糖／葡萄糖／乳糖／麥芽糖／蔗糖）做 PCA 分群與監督式分類。<div class="btnrow" style="margin-top:10px"><a class="btn" href="orange/sugar_pca.ows" download>⬇ 五種糖 PCA（.ows）</a><a class="btn" href="orange/sugar_plsda.ows" download>⬇ 五種糖 分類（.ows）</a><a class="btn" href="data/five_sugar.tab" download>⬇ 五種糖資料（.tab）</a></div><p style="margin:10px 0 0;font-size:15px">五種糖 PCA 用到 <b>Orange-Spectroscopy add-on</b>（Options ▸ Add-ons 裝 Spectra widget）。Orange 沒有內建 PLS-DA，分類範例改用分類器＋Confusion Matrix；要真正的 PLS-DA 請用 Python notebook。</p></div>
+<div class="callout coral"><span class="tag">注意：</span>Orange 是<b>桌面程式，需要先安裝</b>（<a href="https://orangedatamining.com/download" target="_blank" rel="noopener">orangedatamining.com/download</a>），<b>無法在 Colab 執行</b>。如果你沒有電腦、或安裝有困難，請改用上面「<a href="#run">怎麼執行</a>」的 <b>Colab Python notebook</b>，零安裝就能跑出同樣的結果。</div></section>
 <section id="next"><span class="kicker">下一步</span><h2>進入食品真偽問題</h2><p>如果你已經理解 Tecator 的 PCA 與 PLS，下一章會把 NIR 從「成分預測」推進到「食品摻偽鑑別」：咖啡是否摻 barley？摻了多少？</p><div class="btnrow"><a class="btn" href="./">回課程入口</a><a class="btn coral" href="intermediate-coffee-barley.html">前往中階：Coffee–Barley NIR →</a></div></section>
 </main>
 <footer><p><b>入門：Tecator 肉品 NIR — PCA 與 PLS</b></p><p>近紅外光譜 × 食品分析化學計量學 · Python + Orange Data Mining</p></footer>
