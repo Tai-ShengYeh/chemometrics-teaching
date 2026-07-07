@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC-MS/MS 方法確效與量測不確定度教學</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' }
+  };
+  tailwind.config = {
+    theme: { extend: { fontFamily: { sans: ['"Microsoft JhengHei"','"Noto Sans TC"','system-ui','sans-serif'] } } }
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:1rem; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .eqbox { background:#f8fafc; border-left:4px solid #0d9488; border-radius:.5rem; padding:.75rem 1rem; overflow-x:auto; }
+  .keyword { color:#0d9488; font-weight:700; }
+  .en { color:#64748b; font-style:italic; }
+  .steptag { display:inline-flex; align-items:center; justify-content:center; width:1.75rem; height:1.75rem; border-radius:9999px; background:#0d9488; color:#fff; font-weight:700; font-size:.85rem; }
+  table.data { border-collapse:collapse; width:100%; font-size:.85rem; }
+  table.data th, table.data td { border:1px solid #cbd5e1; padding:.35rem .5rem; text-align:center; }
+  table.data th { background:#f1f5f9; }
+  .navlink { padding:.35rem .7rem; border-radius:.5rem; font-size:.8rem; white-space:nowrap; }
+  .navlink:hover { background:#0d9488; color:#fff; }
+  .quiz-opt { cursor:pointer; transition:all .15s; }
+  .quiz-opt:hover { background:#f0fdfa; }
+  .callout { border-radius:.75rem; padding:1rem 1.25rem; }
+  .callout-warn { background:#fef3c7; border-left:4px solid #f59e0b; }
+  .callout-info { background:#e0f2fe; border-left:4px solid #0284c7; }
+  .callout-key { background:#ecfdf5; border-left:4px solid #059669; }
+  details > summary { cursor:pointer; list-style:none; }
+  details > summary::-webkit-details-marker { display:none; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+<!-- Top accent stripe -->
+<div class="h-1.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-emerald-500"></div>
+
+<!-- Sticky nav -->
+<nav class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 overflow-x-auto">
+    <span class="font-bold text-teal-700 text-sm whitespace-nowrap"><i class="fa-solid fa-flask-vial"></i> LC-MS/MS 確效</span>
+    <a href="#s0" class="navlink">總覽</a>
+    <a href="#s1" class="navlink">檢量線</a>
+    <a href="#s2" class="navlink">LOD / LOQ</a>
+    <a href="#s3" class="navlink">GUM 不確定度</a>
+    <a href="#s4" class="navlink">CCα / CCβ</a>
+    <a href="#s5" class="navlink font-semibold text-teal-700">學習測驗</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="bg-gradient-to-br from-teal-700 via-teal-600 to-cyan-700 text-white">
+  <div class="max-w-6xl mx-auto px-6 py-10">
+    <p class="text-teal-100 text-sm mb-1"><i class="fa-solid fa-graduation-cap"></i> 食品／殘留分析　方法確效系列</p>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight">LC-MS/MS 方法確效、檢量線、偵測極限<br>與 ISO GUM 量測不確定度</h1>
+    <p class="mt-3 text-teal-50 max-w-3xl">從檢量線迴歸出發，完整推導 <b>LOD／LOQ</b>、<b>ISO GUM 量測不確定度</b>、以及歐盟 2002/657/EC 的 <b>CCα（決定極限）</b>與 <b>CCβ（偵測能力）</b>；全部以同一組真實檢量線資料貫穿計算，並附互動式學習測驗。</p>
+    <div class="mt-5 flex flex-wrap gap-2 text-xs">
+      <span class="bg-white/15 rounded-full px-3 py-1"><i class="fa-solid fa-chart-line"></i> OLS / WLS 迴歸</span>
+      <span class="bg-white/15 rounded-full px-3 py-1"><i class="fa-solid fa-ruler"></i> LOD＝3.3·S<sub>y,x</sub>/b</span>
+      <span class="bg-white/15 rounded-full px-3 py-1"><i class="fa-solid fa-scale-balanced"></i> GUM 不確定度預算</span>
+      <span class="bg-white/15 rounded-full px-3 py-1"><i class="fa-solid fa-shield-halved"></i> ISO 11843-2 / 2002/657/EC</span>
+    </div>
+    <p class="mt-4 text-[11px] text-teal-200">依據文獻：Evard, Kruve &amp; Leito (Anal. Chim. Acta 942, 2016) Part I &amp; II；Van Loco et al. (Anal. Chim. Acta 586, 2007)；Brüggemann, Morgenstern &amp; Wennrich (Accred. Qual. Assur. 15, 2010)。並整合 ISO/IEC Guide 98-3 (GUM) 與 Eurachem QUAM 指引。</p>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-12">
+
+<!-- =============== SECTION 0 : OVERVIEW =============== -->
+<section id="s0" class="scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map text-teal-600"></i> 0. 課程總覽：確效參數的邏輯地圖</h2>
+  <div class="card p-6 mt-4">
+    <p class="mb-4">方法確效（<span class="en">method validation</span>）的核心，是用統計證據回答兩個問題：<b>「這個訊號是不是分析物？」</b>與<b>「這個數值有多可信？」</b>。四大參數彼此環環相扣，全部建立在同一條檢量線與其殘差之上：</p>
+
+    <div class="grid md:grid-cols-4 gap-3 text-sm">
+      <div class="callout callout-info">
+        <div class="font-bold text-sky-800"><i class="fa-solid fa-1"></i> 檢量線</div>
+        <p class="mt-1">建立 \(y=a+bx\)，取得斜率 \(b\)、殘差標準差 \(S_{y,x}\)。判定線性與變異齊一性。</p>
+      </div>
+      <div class="callout callout-key">
+        <div class="font-bold text-emerald-800"><i class="fa-solid fa-2"></i> LOD / LOQ</div>
+        <p class="mt-1">用 \(S_{y,x}/b\) 換算「能否可靠偵測／定量」的最低濃度。</p>
+      </div>
+      <div class="callout callout-warn">
+        <div class="font-bold text-amber-800"><i class="fa-solid fa-3"></i> 量測不確定度</div>
+        <p class="mt-1">GUM 合成各來源，給出結果的 \(\pm U\)（95%）。</p>
+      </div>
+      <div class="callout" style="background:#f3e8ff;border-left:4px solid #9333ea">
+        <div class="font-bold text-purple-800"><i class="fa-solid fa-4"></i> CCα / CCβ</div>
+        <p class="mt-1">把 α、β 兩型錯誤明確化，用於法規判定（禁用物質）。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-key mt-5">
+      <p class="text-sm"><b><i class="fa-solid fa-lightbulb"></i> 一個關鍵觀念（Evard 2016 Part I）：</b>LOD 是用來<b>「描述方法能力」（characterizing the method）</b>；而要<b>「判讀單一樣品」（interpreting a result）</b>——例如興奮劑或禁藥檢驗——則必須用 CCα／CCβ，因為它們同時明確定義了偽陽性（α）與偽陰性（β）機率。用 LOD 去做個案判定會低估偽陰性風險。</p>
+    </div>
+
+    <details class="mt-4 text-sm">
+      <summary class="text-teal-700 font-semibold"><i class="fa-solid fa-circle-info"></i> 名詞速查（點開）</summary>
+      <div class="mt-3 grid md:grid-cols-2 gap-x-8 gap-y-1">
+        <p><span class="keyword">LOD</span>（Limit of Detection）偵測極限</p>
+        <p><span class="keyword">LOQ</span>（Limit of Quantification）定量極限</p>
+        <p><span class="keyword">CCα</span>（Decision Limit）決定極限</p>
+        <p><span class="keyword">CCβ</span>（Detection Capability）偵測能力</p>
+        <p><span class="keyword">S<sub>y,x</sub></span> 迴歸殘差標準差（residual SD / standard error of estimate）</p>
+        <p><span class="keyword">GUM</span> 量測不確定度表示指引（ISO/IEC Guide 98-3）</p>
+        <p><span class="keyword">MRL / MRPL</span> 最大殘留限量 / 最低要求性能限量</p>
+        <p><span class="keyword">S/N</span> 訊噪比；<span class="keyword">RSD</span> 相對標準差</p>
+        <p><span class="keyword">OLS / WLS</span> 普通 / 加權最小平方迴歸</p>
+        <p><span class="keyword">3R</span> 帶額外霧化毛細管的 ESI 離子源</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- shared dataset -->
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-table-cells text-teal-600"></i> 貫穿全課的示範檢量線資料集</h3>
+    <p class="text-sm mb-3">本課程所有數值計算都用同一組資料（取自 <b>Brüggemann 2010</b> 引用的 DIN 32645 示範資料集）：\(I=10\) 個濃度點，每點 \(J=1\) 次量測。這讓「檢量線 → LOD/LOQ → 不確定度 → CCα/CCβ」的數字可以互相印證。</p>
+    <div class="grid md:grid-cols-2 gap-4 items-center">
+      <div class="overflow-x-auto">
+        <table class="data">
+          <tr><th>點</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr>
+          <tr><th>\(x\) 濃度</th><td>0.05</td><td>0.10</td><td>0.15</td><td>0.20</td><td>0.25</td><td>0.30</td><td>0.35</td><td>0.40</td><td>0.45</td><td>0.50</td></tr>
+          <tr><th>\(y\) 訊號</th><td>3060</td><td>3522</td><td>3707</td><td>4280</td><td>5058</td><td>5510</td><td>5703</td><td>6205</td><td>7156</td><td>7178</td></tr>
+        </table>
+        <div class="mt-3 text-xs bg-slate-50 rounded-lg p-3 leading-relaxed">
+          <b>已算好的迴歸統計量：</b><br>
+          斜率 \(b=9661.9\)，截距 \(a=2480.9\)<br>
+          殘差標準差 \(S_{y,x}=\hat\sigma=192.29\)<br>
+          \(\bar x=0.275\)，\(S_{xx}=\sum(x_i-\bar x)^2=0.20625\)<br>
+          \(R^2=0.985\)，自由度 \(\nu=I\!-\!2=8\)
+        </div>
+      </div>
+      <div>
+        <canvas id="calChart" height="230"></canvas>
+        <p class="text-[11px] text-slate-500 mt-1 text-center">圖：檢量線與資料點（實線為 OLS 迴歸線）</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============== SECTION 1 : CALIBRATION =============== -->
+<section id="s1" class="scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-chart-line text-teal-600"></i> 1. 檢量線與最小平方迴歸</h2>
+
+  <div class="card p-6 mt-4 space-y-4">
+    <h3 class="font-bold text-slate-700">1.1 線性模型與 OLS 估計式</h3>
+    <p class="text-sm">假設回應值與濃度呈線性：</p>
+    <div class="eqbox">\[ y_i = a + b\,x_i + \varepsilon_i \]</div>
+    <p class="text-sm">其中 \(b\) 為斜率（＝方法的<span class="keyword">靈敏度 sensitivity</span>）、\(a\) 為截距、\(\varepsilon_i\) 為隨機誤差。普通最小平方（OLS）估計式：</p>
+    <div class="grid md:grid-cols-2 gap-3 text-sm">
+      <div class="eqbox">\[ b=\frac{\sum_i (x_i-\bar x)(y_i-\bar y)}{\sum_i (x_i-\bar x)^2}=\frac{\sum(x_i-\bar x)(y_i-\bar y)}{S_{xx}} \]</div>
+      <div class="eqbox">\[ a=\bar y - b\,\bar x \]</div>
+    </div>
+    <p class="text-sm"><b>殘差標準差</b>（residual standard deviation，也稱迴歸的標準誤 \(S_{y,x}\)）是後續一切 LOD／不確定度計算的核心：</p>
+    <div class="eqbox">\[ S_{y,x}=\hat\sigma=\sqrt{\dfrac{\sum_i\left(y_i-\hat y_i\right)^2}{I-2}}\qquad(\hat y_i=a+bx_i) \]</div>
+    <p class="text-sm">分母的 \(I-2\)（本例 \(=8\)）是自由度：扣掉斜率與截距兩個估計參數。決定係數 \(R^2\) 只表示線性擬合好壞，<b>不能</b>單獨用來判斷是否「夠線性」——高 \(R^2\) 仍可能有系統性彎曲（見 Evard Part II，Fig.1）。</p>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">1.2 變異齊一性：Homoscedasticity vs Heteroscedasticity</h3>
+    <p class="text-sm"><span class="keyword">變異齊一（homoscedastic）</span>指殘差變異不隨濃度改變；<span class="keyword">變異異質（heteroscedastic）</span>指高濃度的變異較大。<b>LC-MS/MS 資料幾乎總是異質的</b>（Evard Part II）：訊號越大、絕對變異越大。Van Loco (2007) 更指出殘留分析中「異質性無所不在」。</p>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div class="callout callout-info">
+        <b>如何檢查？</b>
+        <ul class="list-disc ml-5 mt-1 space-y-1">
+          <li>殘差對濃度作圖（residual plot）：若呈喇叭狀擴大 → 異質。</li>
+          <li><b>Hartley \(F_{\max}\) 檢定</b>（需每點重複量測）：<div class="eqbox mt-1">\[ F_{\max}=\frac{s^2_{\max}}{s^2_{\min}} \]</div>比較變異最大與最小濃度點，超過臨界值即為異質。</li>
+        </ul>
+      </div>
+      <div class="callout callout-warn">
+        <b>異質時怎麼辦？</b>
+        <ul class="list-disc ml-5 mt-1 space-y-1">
+          <li>採<b>加權最小平方（WLS）</b>，權重 \(w_i=1/s_i^2\)（或 \(1/C^2\)），讓低濃度點的影響力提高，使檢量線在低端更準。</li>
+          <li>或<b>縮小濃度範圍</b>到近似齊一的低段，再用簡單 OLS——這是 Evard 建議的實務作法。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500">⚠️ 若資料異質卻硬用 OLS：斜率／截距估計偏誤，且以單一濃度的標準差估 LOD 會高估或低估。Evard 指出 ISO 給的 CCα/CCβ 在異質資料下會有負偏誤。</p>
+  </div>
+
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2">1.3 選擇檢量點的實務準則（Evard Part II 決策樹）</h3>
+    <ul class="text-sm list-disc ml-5 space-y-1">
+      <li>至少 <b>5 個檢量濃度</b>，其中 <b>≥3 個清楚看得到波峰</b>（S/N &gt; 3）。</li>
+      <li>把空白（blank）納入檢量資料一起積分，以估計低濃度背景（ISO 11843 建議）。</li>
+      <li>整段濃度<b>不要跨超過 2 個數量級</b>，以維持線性與齊一。</li>
+      <li>先移除最高濃度點直到通過線性／齊一檢定，找出「齊一線性範圍」再估 LOD。</li>
+      <li>量測順序<b>隨機化</b>，避免儀器漂移造成系統性偏差。</li>
+    </ul>
+  </div>
+
+  <!-- WLS interactive calculator -->
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-sliders text-emerald-600"></i> 1.4 互動計算器：OLS vs WLS 加權迴歸</h3>
+    <p class="text-sm mb-3">貼上檢量線資料（每行 <code>x, y</code>，若有各濃度重複標準差可加第三欄 <code>x, y, s</code>），選擇權重方案，即時比較普通最小平方（OLS）與加權最小平方（WLS）算出的斜率、截距、殘差標準差與 LOD／LOQ。權重會自動<b>正規化為平均值 1</b>（因此全等權重時 WLS 完全退化回 OLS）。</p>
+    <div class="grid md:grid-cols-2 gap-5">
+      <!-- inputs -->
+      <div>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <button type="button" id="wlsPresetHomo" class="text-xs bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 rounded-lg px-3 py-1.5"><i class="fa-solid fa-table"></i> 載入示範資料（齊一）</button>
+          <button type="button" id="wlsPresetHetero" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5"><i class="fa-solid fa-wave-square"></i> 載入異質資料範例</button>
+        </div>
+        <textarea id="wlsData" rows="11" class="w-full border border-slate-300 rounded-lg p-2 font-mono text-xs" spellcheck="false"></textarea>
+        <div class="mt-2 text-sm">
+          <span class="font-semibold text-slate-600">權重方案 \(w_i\)：</span>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+            <label class="flex items-center gap-1"><input type="radio" name="wscheme" value="ols" class="accent-teal-600" checked> OLS（\(w=1\)）</label>
+            <label class="flex items-center gap-1"><input type="radio" name="wscheme" value="ix2" class="accent-teal-600"> \(1/x^2\)</label>
+            <label class="flex items-center gap-1"><input type="radio" name="wscheme" value="iy2" class="accent-teal-600"> \(1/y^2\)</label>
+            <label class="flex items-center gap-1"><input type="radio" name="wscheme" value="is2" class="accent-teal-600"> \(1/s^2\)（需第三欄）</label>
+          </div>
+        </div>
+        <button type="button" id="wlsCalc" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-lg text-sm"><i class="fa-solid fa-play"></i> 計算</button>
+      </div>
+      <!-- outputs -->
+      <div>
+        <div id="wlsOut" class="bg-slate-50 rounded-lg p-4 text-sm">
+          <p class="text-slate-400 text-center py-8"><i class="fa-solid fa-arrow-left"></i> 載入資料並按「計算」</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-info text-sm mt-3">
+      <b>教學重點：</b>用「異質資料範例」比較兩方案——OLS 被高濃度的大散布拉偏，斜率與 LOD 失真；改用 \(1/x^2\) 或 \(1/y^2\) 加權後，低濃度點的影響力提高，斜率更接近真值、LOD 更合理。反之若資料本來就齊一，兩者幾乎相同（驗證 WLS 不會「無中生有」）。
+    </div>
+  </div>
+</section>
+
+<!-- =============== SECTION 2 : LOD / LOQ =============== -->
+<section id="s2" class="scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-ruler-horizontal text-teal-600"></i> 2. 偵測極限 LOD 與定量極限 LOQ</h2>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">2.1 定義與常見混淆</h3>
+    <p class="text-sm">LOD＝在測試樣品中「能與零可靠區分」的最小濃度。困難在於：這個定義<b>沒有</b>明確說明要不要同時考慮偽陽性與偽陰性。Evard (Part I) 因此建議——嚴謹來說 LOD 應等同同時考量兩型錯誤，也就是接近 <b>CCβ</b> 的意義；許多指引只把 LOD 當成只考慮偽陽性（相當於 CCα），這會導致不同方法的 LOD 無法嚴格互相比較。</p>
+    <div class="callout callout-info text-sm">
+      <b>三段式判讀規則（Currie / Evard）：</b>
+      <ol class="list-decimal ml-5 mt-1 space-y-0.5">
+        <li>結果 &lt; LOD：報「低於 LOD」，<b>並附上 LOD 值</b>（不可只寫「未檢出」）。</li>
+        <li>LOD ≤ 結果 &lt; LOQ：報「微量存在（trace）」，附 LOD 值。</li>
+        <li>結果 ≥ LOQ：報出定量數值，<b>並附上其不確定度</b>。</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">2.2 主要估計法（Evard Part I, Table 1 的濃縮版）</h3>
+    <div class="overflow-x-auto">
+      <table class="data text-left">
+        <tr><th>方法</th><th>公式</th><th>說明 / 假設</th></tr>
+        <tr>
+          <td class="font-semibold">空白／加標標準差<br>(Group 1–2)</td>
+          <td class="text-center">\(LOD=\bar y_0 + t\cdot S(y)\)<br>或 \(LOD=t\cdot S(x)\)</td>
+          <td>\(t\) 取 3 或 4.65；需 6–10 次重複；假設常態、齊一。相當於 CCα（僅顧偽陽性）。</td>
+        </tr>
+        <tr class="bg-emerald-50">
+          <td class="font-semibold">迴歸殘差法 ICH<br>(Group 4)★推薦</td>
+          <td class="text-center">\(LOD=3.3\times\dfrac{S_{y,x}}{b}\)<br>\(LOQ=10\times\dfrac{S_{y,x}}{b}\)</td>
+          <td><b>Evard 全篇建議法</b>：用檢量線殘差 \(S_{y,x}\) 與斜率 \(b\)。免大量重複、給保守估計、與 ISO 11843-2 一致。</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">S/N 訊噪比</td>
+          <td class="text-center">S/N ≥ 3 (LOD)<br>S/N ≥ 10 (LOQ)</td>
+          <td>ICH 建議；但軟體演算的 S/N 受平滑、閾值影響，<b>不建議</b>作為主要估計法。</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">Cut-off（截斷法）</td>
+          <td class="text-center">—</td>
+          <td>對多組不同濃度各測 ~10 次，取「全部（或 95%）都測得到」的最低濃度。穩健但工作量大。</td>
+        </tr>
+        <tr>
+          <td class="font-semibold">ISO 11843-2</td>
+          <td class="text-center">見第 4 節 CCα/CCβ</td>
+          <td>最嚴謹，同時給決定極限與偵測能力；可處理齊一與異質。</td>
+        </tr>
+      </table>
+    </div>
+    <p class="text-xs text-slate-500">係數由來：\(t\approx1.64\)（單尾 95%，僅偽陽性）→ CCα；\(3.3\approx2\times1.64\)（同時 α、β 各 5%）→ CCβ 意義。3.3 這個係數正是把偽陽性與偽陰性都納入的近似。</p>
+  </div>
+
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-3"><i class="fa-solid fa-calculator text-emerald-600"></i> 2.3 完整計算示範（用貫穿資料集）</h3>
+    <div class="bg-slate-50 rounded-lg p-4 text-sm space-y-2">
+      <p class="flex gap-2"><span class="steptag">1</span> <span>取迴歸統計量：\(S_{y,x}=192.29\)，\(b=9661.9\)。</span></p>
+      <p class="flex gap-2"><span class="steptag">2</span> <span>先算靈敏度倒數：\(\dfrac{S_{y,x}}{b}=\dfrac{192.29}{9661.9}=0.01990\)（濃度單位）。</span></p>
+      <p class="flex gap-2"><span class="steptag">3</span> <span><b>LOD</b> \(=3.3\times0.01990=\boxed{0.0657}\)（濃度單位）。</span></p>
+      <p class="flex gap-2"><span class="steptag">4</span> <span><b>LOQ</b> \(=10\times0.01990=\boxed{0.199}\)（濃度單位）。</span></p>
+    </div>
+    <div class="callout callout-warn mt-3 text-sm">
+      <b><i class="fa-solid fa-triangle-exclamation"></i> 逐日變異（day-to-day variability）：</b>Evard 指出只用單日資料估的 LOD，跨日 RSD 可高達 <b>&gt;50%</b>！斜率與背景每天都在變。因此若 LOD 對判定很關鍵，應<b>多日估計</b>（建議 3 天、每天 2 次），並以 <b>between-days LOD ＝ mean(LOD) + 1.65 × SD(LOD)</b> 的 95% 分位數表示，或用管制圖持續監控。</div>
+  </div>
+</section>
+
+<!-- =============== SECTION 3 : GUM =============== -->
+<section id="s3" class="scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-teal-600"></i> 3. ISO GUM 量測不確定度</h2>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">3.1 GUM 是什麼？為什麼需要它</h3>
+    <p class="text-sm"><span class="keyword">GUM</span>（Guide to the Expression of Uncertainty in Measurement，ISO/IEC Guide 98-3；等同 JCGM 100:2008）是量測不確定度評估的國際共通框架。它回答：<b>「這個結果 \(\pm\) 多少，才有 95% 的把握涵蓋真值？」</b>。任何 ISO 17025 認證實驗室的報告都必須附上擴充不確定度 \(U\)。</p>
+    <div class="callout callout-info text-sm">
+      <b>誤差 (error) ≠ 不確定度 (uncertainty)。</b>誤差是「量測值 − 真值」（一個未知的固定值）；不確定度是「對真值所在區間的量化懷疑」，是一個以標準差表示的散布範圍。GUM 只處理後者。
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">3.2 GUM 五步驟流程</h3>
+    <div class="grid md:grid-cols-5 gap-2 text-sm">
+      <div class="callout callout-key"><b>① 建立模型</b><br>寫出 \(Y=f(X_1,\dots,X_N)\) 量測方程式，列出所有輸入量。</div>
+      <div class="callout callout-key"><b>② 評估各 \(u(x_i)\)</b><br>對每個輸入量給標準不確定度（Type A 或 B）。</div>
+      <div class="callout callout-key"><b>③ 靈敏係數</b><br>求 \(c_i=\partial f/\partial x_i\)，把各來源換算到輸出單位。</div>
+      <div class="callout callout-key"><b>④ 合成</b><br>算合成標準不確定度 \(u_c(y)\)。</div>
+      <div class="callout callout-key"><b>⑤ 擴充</b><br>\(U=k\,u_c\)，通常 \(k=2\)（95%）。</div>
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">3.3 Type A vs Type B 評估</h3>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div class="callout callout-info">
+        <b>Type A（統計法）</b>
+        <p class="mt-1">由<b>重複量測</b>的統計分析得到。標準不確定度＝平均值的標準差：</p>
+        <div class="eqbox mt-1">\[ u(\bar x)=\frac{s}{\sqrt{n}},\quad s=\sqrt{\frac{\sum(x_i-\bar x)^2}{n-1}} \]</div>
+        <p class="mt-1">例：精密度（repeatability）、檢量線迴歸的 \(S_{y,x}\)。</p>
+      </div>
+      <div class="callout callout-info">
+        <b>Type B（非統計法）</b>
+        <p class="mt-1">由<b>其他資訊</b>（證書、規格、經驗、分布假設）換算。常見換算：</p>
+        <ul class="list-disc ml-5 mt-1 space-y-0.5">
+          <li>矩形分布（如刻度、純度上下限 \(\pm a\)）：\(u=a/\sqrt{3}\)</li>
+          <li>三角分布：\(u=a/\sqrt{6}\)</li>
+          <li>校正證書給 \(U\) 與 \(k\)：\(u=U/k\)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">3.4 合成與擴充不確定度</h3>
+    <p class="text-sm">輸入量互相獨立時，用<b>不確定度傳播律</b>：</p>
+    <div class="eqbox">\[ u_c^2(y)=\sum_{i=1}^{N}\left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i)=\sum_i c_i^2\,u^2(x_i) \]</div>
+    <p class="text-sm">若模型是純<b>乘除</b>形式 \(Y=\dfrac{X_1 X_2}{X_3}\dots\)，可用更方便的<b>相對不確定度</b>平方和：</p>
+    <div class="eqbox">\[ \frac{u_c(y)}{y}=\sqrt{\left(\frac{u(x_1)}{x_1}\right)^2+\left(\frac{u(x_2)}{x_2}\right)^2+\cdots} \]</div>
+    <p class="text-sm">最後乘上<b>包含因子 \(k\)</b> 得擴充不確定度（報告值）：</p>
+    <div class="eqbox">\[ U=k\cdot u_c(y),\qquad k=2\ \text{（約 95% 信賴水準，常態近似）} \]</div>
+    <p class="text-sm">結果表示為 \(Y = y \pm U\)（並註明 \(k=2\)）。</p>
+  </div>
+
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-list-check text-emerald-600"></i> 3.5 LC-MS/MS 農藥定量的不確定度預算（範例）</h3>
+    <p class="text-sm mb-3">量測模型（回收率校正後濃度）：\( \displaystyle c=\frac{c_{cal}\cdot V \cdot f_{dil}}{m\cdot R} \)。假設某農藥結果 \(c=0.100\ \text{mg/kg}\)，各來源以<b>相對標準不確定度</b>列表：</p>
+    <div class="overflow-x-auto">
+      <table class="data text-left">
+        <tr><th>不確定度來源</th><th>型別</th><th>估計方式</th><th>\(u(x_i)/x_i\)</th></tr>
+        <tr><td>檢量線內插 \(c_{cal}\)</td><td>A</td><td>迴歸預測 \(u(x_0)=\frac{S_{y,x}}{b}\sqrt{\tfrac1M+\tfrac1N+\tfrac{(x_0-\bar x)^2}{S_{xx}}}\)</td><td class="text-center">0.030</td></tr>
+        <tr><td>方法精密度（重複性）</td><td>A</td><td>\(s/\sqrt n\)，日內重複</td><td class="text-center">0.040</td></tr>
+        <tr><td>回收率 \(R\)（偏差校正）</td><td>A/B</td><td>加標回收實驗散布</td><td class="text-center">0.050</td></tr>
+        <tr><td>樣品秤重 \(m\)</td><td>B</td><td>天平證書 / 矩形分布</td><td class="text-center">0.005</td></tr>
+        <tr><td>體積 \(V\)、稀釋 \(f_{dil}\)</td><td>B</td><td>量瓶＋移液器規格 \(a/\sqrt3\)</td><td class="text-center">0.010</td></tr>
+        <tr><td>標準品純度</td><td>B</td><td>證書 \(\pm a\)，矩形 \(a/\sqrt3\)</td><td class="text-center">0.006</td></tr>
+        <tr class="bg-emerald-50 font-semibold"><td colspan="3">合成相對不確定度 \(u_c/c=\sqrt{\sum(\cdot)^2}\)</td><td class="text-center">0.072</td></tr>
+      </table>
+    </div>
+    <div class="bg-slate-50 rounded-lg p-4 text-sm mt-3 space-y-1">
+      <p><b>合成：</b>\(u_c/c=\sqrt{0.030^2+0.040^2+0.050^2+0.005^2+0.010^2+0.006^2}=0.0723\)</p>
+      <p><b>絕對合成：</b>\(u_c=0.0723\times0.100=0.00723\ \text{mg/kg}\)</p>
+      <p><b>擴充（k=2）：</b>\(U=2\times0.00723=0.0145\ \text{mg/kg}\)</p>
+      <p class="text-emerald-800 font-semibold">報告：\(c = 0.100 \pm 0.014\ \text{mg/kg}\)（\(k=2\)，約 95%）</p>
+    </div>
+    <div class="callout callout-info text-sm mt-3">
+      <b>觀念連結：</b>表中第一列的檢量線內插不確定度 \(u(x_0)\)，其形式與第 4 節 ISO 11843-2 的 CCα 公式<b>完全同源</b>——都是 \(\frac{S_{y,x}}{b}\sqrt{\frac1M+\frac1N+\frac{(x_0-\bar x)^2}{S_{xx}}}\)。它在 \(x_0=\bar x\) 時最小、往兩端變大（Brüggemann Fig.2）。這說明「不確定度」與「偵測極限」在數學上是同一棵樹。<br>
+      在本示範資料集中，\(u(x_0)\) 在中心的最小值 \(=\frac{192.29}{9661.9}\sqrt{1+\frac1{10}}=0.0209\)。</div>
+    <div class="callout callout-warn text-sm mt-2">
+      <b>「主要貢獻者」分析：</b>把各列平方後看佔比——回收率(0.050²)與精密度(0.040²)合計佔總變異 &gt;80%。GUM 預算最大價值就在於<b>指出該優先改善哪個步驟</b>（此例：改善回收率再現性最有效，而非買更準的天平）。
+    </div>
+  </div>
+</section>
+
+<!-- =============== SECTION 4 : CCα / CCβ =============== -->
+<section id="s4" class="scroll-mt-20">
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-teal-600"></i> 4. 歐盟 CCα（決定極限）與 CCβ（偵測能力）</h2>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">4.1 兩型錯誤與假說檢定基礎</h3>
+    <p class="text-sm">CCα／CCβ 出自歐盟 <b>Commission Decision 2002/657/EC</b>（配合 96/23/EC 指令），用於禁用物質確認方法。它的統計基礎就是<b>假說檢定的兩型錯誤</b>：</p>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div class="callout" style="background:#fee2e2;border-left:4px solid #dc2626">
+        <b>α 錯誤（偽陽性 false positive）</b>
+        <p class="mt-1">真正合規（乾淨）的樣品被誤判為不合規。<b>CCα ＝ 決定極限</b>：訊號高於此值，才能宣稱「檢出」，偽陽性機率僅 α。</p>
+      </div>
+      <div class="callout" style="background:#dbeafe;border-left:4px solid #2563eb">
+        <b>β 錯誤（偽陰性 false negative）</b>
+        <p class="mt-1">真正含有分析物的樣品被誤判為乾淨。<b>CCβ ＝ 偵測能力</b>：分析物達此濃度時，方法能以 \(1-\beta\) 的把握測到它。</p>
+      </div>
+    </div>
+    <div class="callout callout-warn text-sm">
+      <b>法規 α、β 設定值：</b>對<b>禁用物質（無許可限量）</b>：α = 1%（更嚴防偽陽性冤枉）、β = 5%。對<b>有 MRL 的物質</b>：在 MRL 位置設 α = β = 5%。這就是為何 CCα/CCβ 的 \(t\) 值選擇隨應用而不同。
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">4.2 ISO 11843-2 計算公式（線性檢量、齊一）</h3>
+    <p class="text-sm"><b>CCα＝淨態變數的臨界值 \(x_c\)</b>（決定極限）：</p>
+    <div class="eqbox">\[ CC\alpha = x_c = t_{0.95}(\nu)\,\frac{S_{y,x}}{b}\sqrt{\frac{1}{K}+\frac{1}{I\cdot J}+\frac{\bar x^{2}}{S_{xx}}} \]</div>
+    <p class="text-sm"><b>CCβ＝最小可偵測值 \(x_d\)</b>（偵測能力）：</p>
+    <div class="eqbox">\[ CC\beta = x_d = \delta\,\frac{S_{y,x}}{b}\sqrt{\frac{1}{K}+\frac{1}{I\cdot J}+\frac{\bar x^{2}}{S_{xx}}},\qquad \delta \approx t_{0.95}(\nu)+t_{0.95,\beta}(\nu)\approx 2\,t_{0.95}(\nu) \]</div>
+    <p class="text-sm">其中 \(K\)＝樣品重複量測數、\(I\)＝檢量濃度數、\(J\)＝每濃度製備數、\(\delta\) 為<b>非中心 t 分布的非中心參數（non-centrality parameter）</b>。當標準差隨濃度線性變化（異質）時，\(x_d\) 需<b>迭代求解</b>並改用加權迴歸（Van Loco 2007 的作法）。</p>
+    <details class="text-sm">
+      <summary class="text-teal-700 font-semibold"><i class="fa-solid fa-code-branch"></i> 與 2002/657/EC 及 DIN 32645 的關係（點開）</summary>
+      <div class="mt-2 bg-slate-50 rounded p-3 space-y-1">
+        <p>三套標準<b>數學基礎相同</b>（假說檢定 + α/β），只是符號與適用範圍不同（Brüggemann 2010 的結論）：</p>
+        <ul class="list-disc ml-5">
+          <li><b>DIN 32645</b>：設計給齊一濃度範圍；用 \(t\) 分布（樣本統計）。</li>
+          <li><b>ISO 11843-2</b>：可含較寬範圍（用加權迴歸）；唯一明訂異質時要迭代；用非中心 \(t\)。</li>
+          <li><b>2002/657/EC</b>：聚焦篩檢／確認判定，α/β 依應用而定；預測區間用常態分位數（母體統計）。</li>
+        </ul>
+        <p>因此三者算出的臨界濃度會「相近但不完全相同」，差異來自 α/β 設定與 t vs 常態分位數的選擇。</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-3"><i class="fa-solid fa-calculator text-emerald-600"></i> 4.3 CCα / CCβ 完整計算示範（同一資料集）</h3>
+    <p class="text-sm mb-3">此例視為「無許可限量」，門檻 \(x_{threshold}\approx0\)。設 \(K=1,\ I\cdot J=10\)。</p>
+    <div class="bg-slate-50 rounded-lg p-4 text-sm space-y-2">
+      <p class="flex gap-2"><span class="steptag">1</span><span>先算共同的根號項：\(\sqrt{\tfrac1K+\tfrac1{IJ}+\tfrac{\bar x^2}{S_{xx}}}=\sqrt{1+0.1+\tfrac{0.275^2}{0.20625}}=\sqrt{1+0.1+0.3667}=\sqrt{1.4667}=1.2111\)。</span></p>
+      <p class="flex gap-2"><span class="steptag">2</span><span>靈敏度項：\(\dfrac{S_{y,x}}{b}=\dfrac{192.29}{9661.9}=0.01990\)。故 \(\dfrac{S_{y,x}}{b}\times1.2111=0.02410\)。</span></p>
+      <p class="flex gap-2"><span class="steptag">3</span><span><b>CCα</b>（α=5%，\(t_{0.95}(8)=1.860\)）：\(=1.860\times0.02410=\boxed{0.0448}\)。<br>（α=1%，\(t_{0.99}(8)=2.896\) → CCα \(=0.0698\)。）</span></p>
+      <p class="flex gap-2"><span class="steptag">4</span><span><b>CCβ</b>（α=β=5%，\(\delta\approx2\times1.860=3.719\)）：\(=3.719\times0.02410=\boxed{0.0896}\)。<br>（α=β=1%，\(\delta\approx2\times2.896=5.793\) → CCβ \(=0.1396\)。）</span></p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4 mt-4 items-center">
+      <div class="text-sm">
+        <p class="font-semibold text-slate-700 mb-1">結果解讀：</p>
+        <ul class="list-disc ml-5 space-y-1">
+          <li>樣品換算濃度 &gt; <b>CCα (0.0448)</b> → 可宣稱「檢出／不合規」，偽陽性 ≤5%。</li>
+          <li>當真實濃度達 <b>CCβ (0.0896)</b>，方法有 95% 把握測到它。</li>
+          <li>注意 CCβ &gt; CCα：兩者間是「可能檢出但不保證」的灰區。</li>
+          <li>對照第 2 節：同資料的 ICH LOD＝0.0657，恰落在 CCα 與 CCβ 之間——印證 LOD 的意義介於「只顧偽陽性」與「兼顧偽陰性」之間。</li>
+        </ul>
+      </div>
+      <div>
+        <canvas id="ccChart" height="230"></canvas>
+        <p class="text-[11px] text-slate-500 mt-1 text-center">圖：空白（左）與含物質樣品（右）的訊號分布；α、β 為兩尾錯誤面積</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6 mt-4 space-y-3">
+    <h3 class="font-bold text-slate-700">4.4 「不完美的結合」：量化 vs 定性判準（Van Loco 2007）</h3>
+    <p class="text-sm">Van Loco 的關鍵發現：只用 ISO 11843-2 的<b>純統計（量化）</b>算出的 CCα/CCβ，在真實 LC-MS/MS 上<b>可能低到不切實際</b>，因為它沒考慮 MS <b>確認鑑定（identification）</b>的定性判準。禁用物質確認需要 <b>4 個鑑定點</b>（1 母離子 + 2 子離子 ×1.5 分）。在很低濃度時，較弱的定性離子會消失、<b>離子比（ion ratio）</b>超出容許範圍。</p>
+    <div class="callout callout-warn text-sm">
+      <b>實務結論：</b>在計算出的（過低的）CCα/CCβ 濃度，<b>定性判準常常無法滿足</b>（離子比、RRT、S/N≥3）。因此 CCβ 必須用<b>加標樣品</b>（在 MRPL 及其以下逐級加標）實測驗證：要求在 CCβ 有 95% 案例、在 CCα 有 50% 案例能通過鑑定判準。這就是標題所說量化與定性判準的「不完美結合」。</div>
+    <details class="text-sm">
+      <summary class="text-teal-700 font-semibold"><i class="fa-solid fa-table"></i> Van Loco 實測數據對照（點開，nitroimidazoles）</summary>
+      <div class="mt-2 overflow-x-auto">
+        <table class="data">
+          <tr><th>化合物</th><th>MRPL</th><th>ISO 11843 CCβ</th><th>依鑑定判準 CCβ</th></tr>
+          <tr><td>MNZ</td><td>1</td><td>0</td><td>&lt;0.25</td></tr>
+          <tr><td>DMZ</td><td>1</td><td>0.17</td><td>&lt;0.5</td></tr>
+          <tr><td>RNZ</td><td>2</td><td>0.10</td><td>&lt;1</td></tr>
+          <tr><td>HMMNI</td><td>2</td><td>0.13</td><td>&lt;1</td></tr>
+        </table>
+        <p class="text-xs text-slate-500 mt-1">單位 μg/kg。可見純統計 CCβ（甚至算出 0）遠低於鑑定判準實測值，會嚴重高估方法能力。</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Van Loco weighted iterative worked example -->
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-repeat text-purple-600"></i> 4.5 加權迭代 CCα／CCβ 完整算例（Van Loco 2007）</h3>
+    <p class="text-sm">當殘留分析資料為<b>異質（heteroscedastic）</b>時，臨界濃度處的標準差本身會隨濃度改變——而那個濃度正是我們要求的 CCα／CCβ。於是形成一個「答案出現在自己公式裡」的<b>固定點問題（fixed-point）</b>，必須<b>迭代求解</b>。Van Loco 的做法：</p>
+
+    <div class="grid md:grid-cols-2 gap-4 mt-3 text-sm">
+      <div class="callout callout-key">
+        <b>步驟一：擬合變異函數</b>
+        <p class="mt-1">把各濃度的標準差 \(S_i\) 對濃度 \(X\) 作線性迴歸，得<b>變異函數</b>：</p>
+        <div class="eqbox mt-1">\[ S(X)=a'+b'\,X \]</div>
+        <p class="mt-1">Van Loco 對 MNZ-OH（血漿中硝基咪唑代謝物）實測（Fig.1）：\(a'=0.0023\)、\(b'=0.0831\)、\(R^2=0.9924\)。權重取 \(w_i=1/S_i^2\)。</p>
+      </div>
+      <div class="callout callout-key">
+        <b>步驟二：迭代求解</b>
+        <p class="mt-1">Van Loco 加權式 (3)(4) 中含 \(S_{CC\alpha}=(a'+b'\cdot CC\alpha)\)（隨答案而變）。整理成迭代式（\(s_{cal}\) 為檢量線項貢獻的合成標準差）：</p>
+        <div class="eqbox mt-1">\[ CC\alpha_{k+1}=t\sqrt{\big(a'+b'\,CC\alpha_k\big)^2+s_{cal}^2} \]</div>
+        <div class="eqbox mt-1">\[ CC\beta_{k+1}=\delta\sqrt{\big(a'+b'\,CC\beta_k\big)^2+s_{cal}^2} \]</div>
+        <p class="mt-1">其中 \(\delta=t_{1-\alpha}+t_{1-\beta}\)（非中心參數）。反覆代入直到收斂。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warn text-sm mt-3">
+      <b><i class="fa-solid fa-circle-info"></i> 本算例參數：</b>採 MNZ-OH 真實變異函數（\(a'=0.0023,\ b'=0.0831\)），檢量線項 \(s_{cal}=0.026\)，\(t=2.9\)（\(\alpha=1\%\)）、\(\delta=t_{0.99}+t_{0.95}=2.9+1.86=4.76\)（\(\beta=5\%\)）。初始猜測 \(CC=0.05\)。<b>迭代收斂結果與 Van Loco 論文 Table 1 完全一致：CCα ≈ 0.08、CCβ ≈ 0.14 μg/kg。</b>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5 mt-4">
+      <!-- iteration solver -->
+      <div>
+        <p class="font-semibold text-slate-700 mb-2 text-sm"><i class="fa-solid fa-calculator"></i> 互動迭代求解器</p>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <label class="flex items-center justify-between gap-2">a′ <input id="vlA" type="number" step="any" value="0.0023" class="border rounded px-2 py-1 w-24 text-right"></label>
+          <label class="flex items-center justify-between gap-2">b′ <input id="vlB" type="number" step="any" value="0.0831" class="border rounded px-2 py-1 w-24 text-right"></label>
+          <label class="flex items-center justify-between gap-2">s<sub>cal</sub> <input id="vlScal" type="number" step="any" value="0.026" class="border rounded px-2 py-1 w-24 text-right"></label>
+          <label class="flex items-center justify-between gap-2">初始猜測 <input id="vlInit" type="number" step="any" value="0.05" class="border rounded px-2 py-1 w-24 text-right"></label>
+          <label class="flex items-center justify-between gap-2">t (α) <input id="vlT" type="number" step="any" value="2.9" class="border rounded px-2 py-1 w-24 text-right"></label>
+          <label class="flex items-center justify-between gap-2">δ (α,β) <input id="vlD" type="number" step="any" value="4.76" class="border rounded px-2 py-1 w-24 text-right"></label>
+        </div>
+        <button type="button" id="vlRun" class="mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold px-5 py-2 rounded-lg text-sm"><i class="fa-solid fa-play"></i> 執行迭代</button>
+      </div>
+      <!-- iteration output -->
+      <div>
+        <div id="vlOut" class="bg-slate-50 rounded-lg p-3 text-sm">
+          <p class="text-slate-400 text-center py-8"><i class="fa-solid fa-arrow-left"></i> 按「執行迭代」看收斂過程</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info text-sm mt-4">
+      <b>與 4.4 節呼應的結論：</b>就算用嚴謹的加權迭代把 CCα／CCβ 算得再精確，這仍只是<b>量化（統計）</b>結果。Van Loco 發現在這些低到 0.08／0.14 μg/kg 的濃度，MS 的<b>定性鑑定判準</b>（離子比、RRT、S/N≥3）常常無法通過。因此最終仍須以<b>加標樣品在 MRPL 及其以下逐級驗證</b>：在 CCβ 要有 95% 案例、在 CCα 要有 50% 案例通過鑑定，才是可執行的真實偵測能力。這就是「量化與定性判準的不完美結合」。
+    </div>
+  </div>
+</section>
+
+<!-- =============== SECTION 5 : QUIZ =============== -->
+<section id="s5" class="scroll-mt-20">
+  <div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
+    <h2 class="text-2xl font-bold flex items-center gap-2"><i class="fa-solid fa-clipboard-question"></i> 5. 學習測驗</h2>
+    <span class="text-sm bg-white/20 rounded-full px-3 py-1" id="progressBadge">0 / 17</span>
+  </div>
+  <div class="card rounded-t-none p-6">
+    <p class="text-sm text-slate-600 mb-4">共 17 題（概念 + 計算）。作答後按下方「批改」看分數與詳解。計算題容許 ±5% 誤差。</p>
+    <div id="quizContainer" class="space-y-6"></div>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <button id="gradeBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-lg shadow"><i class="fa-solid fa-check-double"></i> 批改</button>
+      <button id="resetBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-5 py-2.5 rounded-lg"><i class="fa-solid fa-rotate-left"></i> 重作</button>
+      <div id="scoreBox" class="hidden ml-auto text-lg font-bold"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Dark footer bar -->
+<footer class="bg-slate-800 text-slate-300 mt-12">
+  <div class="max-w-6xl mx-auto px-6 py-6 text-sm">
+    <p class="font-semibold text-white mb-1">LC-MS/MS 方法確效教學 · 參考文獻</p>
+    <ol class="list-decimal ml-5 space-y-0.5 text-xs text-slate-400">
+      <li>Evard H., Kruve A., Leito I. <i>Tutorial on estimating the limit of detection using LC-MS analysis, Part I: Theoretical review.</i> Anal. Chim. Acta 942 (2016) 23–39.</li>
+      <li>Evard H., Kruve A., Leito I. <i>Part II: Practical aspects.</i> Anal. Chim. Acta 942 (2016) 40–49.</li>
+      <li>Van Loco J. et al. <i>Calculation of the decision limit (CCα) and the detection capability (CCβ) for banned substances.</i> Anal. Chim. Acta 586 (2007) 8–12.</li>
+      <li>Brüggemann L., Morgenstern P., Wennrich R. <i>Comparison of international standards concerning the capability of detection.</i> Accred. Qual. Assur. 15 (2010) 99–104.</li>
+      <li>ISO/IEC Guide 98-3 (GUM); Eurachem/CITAC Guide QUAM; Commission Decision 2002/657/EC; ISO 11843-2; DIN 32645; ICH Q2(R1).</li>
+    </ol>
+    <p class="mt-3 text-xs text-slate-500">本頁為教學用途整理；正式確效請依所屬法規與最新版標準文件執行。</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Calibration chart ---------- */
+const CAL_X = [0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50];
+const CAL_Y = [3060,3522,3707,4280,5058,5510,5703,6205,7156,7178];
+const B = 9661.9, A = 2480.9;
+new Chart(document.getElementById('calChart'), {
+  type:'scatter',
+  data:{ datasets:[
+    { label:'資料點', data:CAL_X.map((x,i)=>({x, y:CAL_Y[i]})), backgroundColor:'#0d9488', pointRadius:4 },
+    { label:'迴歸線 y=9661.9x+2480.9', type:'line', data:[{x:0,y:A},{x:0.52,y:A+B*0.52}], borderColor:'#dc2626', borderWidth:2, pointRadius:0, fill:false }
+  ]},
+  options:{ plugins:{legend:{labels:{boxWidth:12,font:{size:10}}}},
+    scales:{ x:{title:{display:true,text:'濃度 x'}}, y:{title:{display:true,text:'訊號 y'}} } }
+});
+
+/* ---------- CCα / CCβ two-distribution chart ---------- */
+function gauss(x,mu,s){ return Math.exp(-0.5*Math.pow((x-mu)/s,2)); }
+const ccLabels=[], gBlank=[], gSample=[];
+const sd=0.024, muB=0, muS=0.0896;
+for(let x=-0.06; x<=0.18; x+=0.003){
+  ccLabels.push(x.toFixed(3));
+  gBlank.push(gauss(x,muB,sd));
+  gSample.push(gauss(x,muS,sd));
+}
+new Chart(document.getElementById('ccChart'), {
+  type:'line',
+  data:{ labels:ccLabels, datasets:[
+    {label:'空白分布', data:gBlank, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.08)', fill:true, pointRadius:0, borderWidth:2, tension:.3},
+    {label:'含物質樣品 (@CCβ)', data:gSample, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,.08)', fill:true, pointRadius:0, borderWidth:2, tension:.3}
+  ]},
+  options:{ plugins:{legend:{labels:{boxWidth:12,font:{size:10}}},
+      annotation:false,
+      tooltip:{enabled:false}},
+    scales:{ x:{title:{display:true,text:'訊號（→ 濃度）'}, ticks:{maxTicksLimit:7}}, y:{display:false} } }
+});
+
+/* ---------- WLS calculator ---------- */
+const HOMO_DATA = CAL_X.map((x,i)=>`${x}, ${CAL_Y[i]}`).join('\n');
+const HETERO_DATA = [
+  '1, 71','2, 118','3, 175','4, 215','5, 280',
+  '6, 305','7, 390','8, 395','9, 500','10, 480'
+].join('\n');
+
+function parseWls(){
+  const lines = document.getElementById('wlsData').value.trim().split(/\n+/);
+  const x=[],y=[],s=[];
+  for(const ln of lines){
+    const p = ln.split(/[,\s]+/).map(Number).filter(v=>!isNaN(v));
+    if(p.length>=2){ x.push(p[0]); y.push(p[1]); s.push(p.length>=3?p[2]:null); }
+  }
+  return {x,y,s};
+}
+function wreg(x,y,w){
+  const n=x.length;
+  let sw=0; for(let i=0;i<n;i++) sw+=w[i];
+  const wn = w.map(wi => wi*n/sw);            // normalize: mean weight = 1
+  let Sw=0,Swx=0,Swy=0;
+  for(let i=0;i<n;i++){ Sw+=wn[i]; Swx+=wn[i]*x[i]; Swy+=wn[i]*y[i]; }
+  const xbar=Swx/Sw, ybar=Swy/Sw;
+  let Sxx=0,Sxy=0;
+  for(let i=0;i<n;i++){ Sxx+=wn[i]*(x[i]-xbar)**2; Sxy+=wn[i]*(x[i]-xbar)*(y[i]-ybar); }
+  const b=Sxy/Sxx, a=ybar-b*xbar;
+  let ssr=0,sstot=0;
+  for(let i=0;i<n;i++){ const yh=a+b*x[i]; ssr+=wn[i]*(y[i]-yh)**2; sstot+=wn[i]*(y[i]-ybar)**2; }
+  const syx=Math.sqrt(ssr/(n-2));
+  const r2=1-ssr/sstot;
+  return {b,a,syx,r2,n};
+}
+function fmt(v,d=4){ if(!isFinite(v)) return '—'; const a=Math.abs(v); return (a>=1000||(a<0.001&&a>0))? v.toExponential(3) : v.toFixed(d); }
+function runWls(){
+  const {x,y,s} = parseWls();
+  const out = document.getElementById('wlsOut');
+  if(x.length<3){ out.innerHTML='<p class="text-red-600">至少需要 3 個資料點。</p>'; return; }
+  const scheme = document.querySelector('input[name="wscheme"]:checked').value;
+  let w, note='';
+  if(scheme==='ols'){ w=x.map(()=>1); }
+  else if(scheme==='ix2'){ w=x.map(v=> v!==0 ? 1/(v*v) : 0); }
+  else if(scheme==='iy2'){ w=y.map(v=> v!==0 ? 1/(v*v) : 0); }
+  else { // is2
+    if(s.some(v=>v===null||v===0)){ out.innerHTML='<p class="text-red-600">1/s² 需要每行第三欄提供非零標準差 s。</p>'; return; }
+    w=s.map(v=>1/(v*v));
+  }
+  const ols = wreg(x,y,x.map(()=>1));
+  const cur = wreg(x,y,w);
+  const lodO=3.3*ols.syx/ols.b, loqO=10*ols.syx/ols.b;
+  const lodC=3.3*cur.syx/cur.b, loqC=10*cur.syx/cur.b;
+  const label = scheme==='ols'?'OLS':('WLS ('+({ix2:'1/x²',iy2:'1/y²',is2:'1/s²'}[scheme])+')');
+  out.innerHTML = `
+    <table class="w-full text-sm">
+      <tr class="text-slate-500 text-xs"><th class="text-left py-1">參數</th><th class="text-right">OLS (基準)</th><th class="text-right text-emerald-700">${label}</th></tr>
+      <tr class="border-t"><td>斜率 b</td><td class="text-right font-mono">${fmt(ols.b,3)}</td><td class="text-right font-mono text-emerald-700">${fmt(cur.b,3)}</td></tr>
+      <tr class="border-t"><td>截距 a</td><td class="text-right font-mono">${fmt(ols.a,3)}</td><td class="text-right font-mono text-emerald-700">${fmt(cur.a,3)}</td></tr>
+      <tr class="border-t"><td>殘差 S<sub>y,x</sub></td><td class="text-right font-mono">${fmt(ols.syx,3)}</td><td class="text-right font-mono text-emerald-700">${fmt(cur.syx,3)}</td></tr>
+      <tr class="border-t"><td>R²</td><td class="text-right font-mono">${fmt(ols.r2,4)}</td><td class="text-right font-mono text-emerald-700">${fmt(cur.r2,4)}</td></tr>
+      <tr class="border-t bg-emerald-50"><td>LOD = 3.3·S<sub>y,x</sub>/b</td><td class="text-right font-mono">${fmt(lodO,4)}</td><td class="text-right font-mono text-emerald-700 font-bold">${fmt(lodC,4)}</td></tr>
+      <tr class="border-t bg-emerald-50"><td>LOQ = 10·S<sub>y,x</sub>/b</td><td class="text-right font-mono">${fmt(loqO,4)}</td><td class="text-right font-mono text-emerald-700 font-bold">${fmt(loqC,4)}</td></tr>
+    </table>
+    <p class="text-xs text-slate-500 mt-2">n = ${cur.n}；權重已正規化為平均值 1。${scheme==='ols'?'（目前為 OLS，兩欄相同。）':''}</p>`;
+}
+document.getElementById('wlsPresetHomo').addEventListener('click', ()=>{ document.getElementById('wlsData').value=HOMO_DATA; runWls(); });
+document.getElementById('wlsPresetHetero').addEventListener('click', ()=>{ document.getElementById('wlsData').value=HETERO_DATA; runWls(); });
+document.getElementById('wlsCalc').addEventListener('click', runWls);
+document.getElementById('wlsData').value = HOMO_DATA;   // preload
+
+/* ---------- Van Loco iterative CCα/CCβ solver ---------- */
+function iterate(factor, ap, bp, scal, init){
+  const rows=[]; let v=init;
+  for(let k=0;k<40;k++){
+    const S = ap + bp*v;
+    const next = factor*Math.sqrt(S*S + scal*scal);
+    rows.push({k, v, S, next});
+    if(Math.abs(next-v) < 1e-5){ rows.push({k:k+1, v:next, S:ap+bp*next, next:next, done:true}); break; }
+    v = next;
+  }
+  return rows;
+}
+function itTable(title, rows, color){
+  let h = `<p class="font-semibold ${color} mb-1">${title}　→ 收斂 = <span class="font-mono">${fmt(rows[rows.length-1].v,4)}</span></p>`;
+  h += '<table class="w-full text-xs mb-3"><tr class="text-slate-500"><th class="text-left">k</th><th class="text-right">CC(k)</th><th class="text-right">S=a′+b′·CC</th><th class="text-right">CC(k+1)</th></tr>';
+  rows.forEach(r=>{ h += `<tr class="${r.done?'bg-emerald-50 font-bold':''}"><td>${r.k}</td><td class="text-right font-mono">${fmt(r.v,4)}</td><td class="text-right font-mono">${fmt(r.S,4)}</td><td class="text-right font-mono">${fmt(r.next,4)}</td></tr>`; });
+  h += '</table>';
+  return h;
+}
+function runVL(){
+  const ap=+document.getElementById('vlA').value, bp=+document.getElementById('vlB').value,
+        scal=+document.getElementById('vlScal').value, init=+document.getElementById('vlInit').value,
+        t=+document.getElementById('vlT').value, d=+document.getElementById('vlD').value;
+  const rA = iterate(t, ap, bp, scal, init);
+  const rB = iterate(d, ap, bp, scal, init);
+  document.getElementById('vlOut').innerHTML =
+    itTable('CCα（決定極限，t='+t+'）', rA, 'text-red-600') +
+    itTable('CCβ（偵測能力，δ='+d+'）', rB, 'text-blue-600');
+}
+document.getElementById('vlRun').addEventListener('click', runVL);
+
+/* ---------- QUIZ ---------- */
+const QUIZ = [
+  { type:'mc', q:'1. 在 LC-MS/MS 這類跨較寬濃度範圍的資料中，殘差通常隨濃度增大而變大。這種現象稱為？',
+    opts:['變異齊一（homoscedasticity）','變異異質（heteroscedasticity）','非線性（non-linearity）','離群值（outlier）'], ans:1,
+    exp:'高濃度變異較大＝heteroscedasticity（變異異質），LC-MS/MS 幾乎總是如此，應考慮加權迴歸（WLS）或縮小濃度範圍。' },
+
+  { type:'mc', q:'2. Evard (2016) 全篇最推薦、用來估計 LOD 的量是？',
+    opts:['峰高的 S/N','空白訊號的標準差','檢量線殘差標準差 S_y,x','截距的標準差'], ans:2,
+    exp:'建議用檢量線殘差標準差 S_y,x（配 LOD=3.3·S_y,x/b）：免大量重複、給保守估計、與 ISO 11843-2 一致。截距標準差會低估 0 濃度處的變異。' },
+
+  { type:'mc', q:'3. 關於 LOD 與 CCα/CCβ 的使用時機，何者正確？',
+    opts:['LOD 用於判定單一樣品是否違規；CCα/CCβ 用於描述方法','LOD 用於描述方法能力；判定單一樣品（如禁藥）應用 CCα/CCβ','兩者完全等價可互換','CCβ 只考慮偽陽性'], ans:1,
+    exp:'LOD 適合「描述方法」；要對個案做關鍵判定（明確控制 α 與 β）時須用 CCα/CCβ。用 LOD 做個案判定會忽略偽陰性風險。' },
+
+  { type:'mc', q:'4. CCα（決定極限）主要控制哪一型錯誤？',
+    opts:['偽陽性（α，把乾淨樣品判成違規）','偽陰性（β，把違規樣品判成乾淨）','系統誤差','隨機誤差'], ans:0,
+    exp:'CCα＝決定極限，控制偽陽性 α：訊號高於 CCα 才宣稱檢出，避免冤枉合規樣品。' },
+
+  { type:'mc', q:'5. 對「無許可限量」的禁用物質，2002/657/EC 通常設定的 α 與 β 為？',
+    opts:['α=5%, β=5%','α=1%, β=5%','α=5%, β=1%','α=1%, β=1%'], ans:1,
+    exp:'禁用物質：α=1%（嚴防偽陽性冤枉）、β=5%。有 MRL 的物質則在 MRL 位置設 α=β=5%。' },
+
+  { type:'mc', q:'6. GUM 中，由「重複量測的統計分析」得到的標準不確定度屬於？',
+    opts:['Type A','Type B','Type C','擴充不確定度'], ans:0,
+    exp:'Type A＝由重複量測統計得到（如 s/√n）；Type B＝由證書、規格、分布假設等其他資訊換算。' },
+
+  { type:'mc', q:'7. 校正證書標示體積「±0.05 mL」為矩形（均勻）分布，其標準不確定度為？',
+    opts:['0.05','0.05/√2','0.05/√3','0.05/√6'], ans:2,
+    exp:'矩形（均勻）分布：u = a/√3。三角分布才是 a/√6。' },
+
+  { type:'mc', q:'8. 擴充不確定度 U 與合成標準不確定度 u_c 的關係（約 95%）通常為？',
+    opts:['U = u_c','U = 2·u_c（k=2）','U = u_c/2','U = 3.3·u_c'], ans:1,
+    exp:'U = k·u_c，常態近似下 k=2 對應約 95% 信賴水準。報告寫成 y ± U 並註明 k。' },
+
+  { type:'mc', q:'9. Van Loco (2007)「不完美的結合」指的是？',
+    opts:['OLS 與 WLS 不一致','純統計算的 CCα/CCβ 與 MS 定性鑑定判準（離子比、RRT）之間的落差','LOD 與 LOQ 不一致','兩台儀器結果不同'], ans:1,
+    exp:'純量化統計算出的 CCα/CCβ 可能低到不切實際，因為未納入 MS 鑑定判準；必須用加標樣品實測驗證離子比、RRT、S/N。' },
+
+  { type:'mc', q:'10. 為什麼建議估 LOD 時要跨「多日」而非單日？',
+    opts:['LOD 不會隨時間改變','LOD 的逐日 RSD 可達 >50%，斜率與背景每天變動','多日只是形式要求','單日資料一定違法'], ans:1,
+    exp:'Evard 指出 LOD 逐日變異極大（RSD 可 >50%），單日估計不可靠；關鍵應用建議 3 天、每天 2 次，取 between-days LOD。' },
+
+  { type:'num', q:'11.【計算】已知 S_y,x = 192.29、斜率 b = 9661.9。用 ICH 法求 LOD＝3.3·S_y,x/b。（保留約 3 位有效數字）',
+    ans:0.0657, tol:0.05, unit:'', exp:'S_y,x/b = 192.29/9661.9 = 0.01990；LOD = 3.3×0.01990 = 0.0657。' },
+
+  { type:'num', q:'12.【計算】同上資料，用 ICH 法求 LOQ＝10·S_y,x/b。',
+    ans:0.199, tol:0.05, unit:'', exp:'LOQ = 10×0.01990 = 0.199（約為 LOD 的 3 倍）。' },
+
+  { type:'num', q:'13.【計算】共同根號項為 1.2111、S_y,x/b = 0.01990、t₀.₉₅(8)=1.860。求 CCα（α=5%）＝ t·(S_y,x/b)·√(…)。',
+    ans:0.0448, tol:0.05, unit:'', exp:'CCα = 1.860 × 0.01990 × 1.2111 = 0.0448。' },
+
+  { type:'num', q:'14.【計算】承上，α=β=5% 時非中心參數 δ≈2×1.860=3.719。求 CCβ＝δ·(S_y,x/b)·1.2111。',
+    ans:0.0896, tol:0.05, unit:'', exp:'CCβ = 3.719 × 0.01990 × 1.2111 = 0.0896。注意 CCβ > CCα。' },
+
+  { type:'num', q:'15.【計算·GUM】某結果各相對不確定度：檢量線 0.030、精密度 0.040、回收率 0.050。僅用這三項求合成相對不確定度 √(0.030²+0.040²+0.050²)。',
+    ans:0.0707, tol:0.06, unit:'', exp:'√(0.0009+0.0016+0.0025)=√0.005=0.0707。可見回收率與精密度是主要貢獻者。' },
+
+  { type:'mc', q:'16. 對強烈異質（heteroscedastic）的檢量線，改用 WLS（如權重 1/x²）相較 OLS 的主要好處是？',
+    opts:['讓 R² 一定變成 1','降低高濃度大散布點的影響力，使低端斜率與 LOD 更準','完全消除隨機誤差','把資料變成線性'], ans:1,
+    exp:'WLS 給高變異（高濃度）點較低權重、低濃度點較高權重，讓迴歸線在關鍵的低濃度區更貼合，斜率與 LOD/CCα 估計更可靠。若資料本來就齊一，WLS≈OLS。' },
+
+  { type:'mc', q:'17. Van Loco (2007) 在異質資料下計算加權 CCα/CCβ 時必須「迭代求解」，根本原因是？',
+    opts:['電腦精度不足','臨界濃度處的標準差 S=(a′+b′·CC) 本身取決於待求的 CC 值，形成固定點問題','t 分布沒有公式解','斜率是負的'], ans:1,
+    exp:'變異函數 S(X)=a′+b′X 使得 CCα/CCβ 公式裡的 S 依賴於答案本身，答案出現在自己的式子中（fixed-point），只能反覆代入直到收斂。' },
+];
+
+const container = document.getElementById('quizContainer');
+let graded = false;
+
+function renderQuiz(){
+  container.innerHTML = '';
+  QUIZ.forEach((item, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'border border-slate-200 rounded-xl p-4';
+    wrap.id = 'q'+i;
+    let inner = `<p class="font-semibold text-slate-800 mb-3">${item.q}</p>`;
+    if(item.type === 'mc'){
+      inner += '<div class="space-y-2">';
+      item.opts.forEach((o, j) => {
+        inner += `<label class="quiz-opt flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2 text-sm">
+          <input type="radio" name="q${i}" value="${j}" class="accent-teal-600"> <span>${o}</span></label>`;
+      });
+      inner += '</div>';
+    } else {
+      inner += `<div class="flex items-center gap-2">
+        <input type="number" step="any" name="q${i}" class="border border-slate-300 rounded-lg px-3 py-2 w-40 text-sm" placeholder="輸入數值">
+        <span class="text-sm text-slate-500">${item.unit||''}</span></div>`;
+    }
+    inner += `<div class="feedback mt-3 text-sm hidden"></div>`;
+    wrap.innerHTML = inner;
+    container.appendChild(wrap);
+  });
+  updateProgress();
+  container.querySelectorAll('input').forEach(el => el.addEventListener('input', updateProgress));
+}
+
+function updateProgress(){
+  let answered = 0;
+  QUIZ.forEach((item,i) => {
+    if(item.type==='mc'){ if(document.querySelector(`input[name="q${i}"]:checked`)) answered++; }
+    else { const v=document.querySelector(`input[name="q${i}"]`).value; if(v!=='') answered++; }
+  });
+  document.getElementById('progressBadge').textContent = `${answered} / ${QUIZ.length}`;
+}
+
+function grade(){
+  let score = 0;
+  QUIZ.forEach((item,i) => {
+    const wrap = document.getElementById('q'+i);
+    const fb = wrap.querySelector('.feedback');
+    let correct = false, given = null;
+    if(item.type==='mc'){
+      const sel = document.querySelector(`input[name="q${i}"]:checked`);
+      given = sel ? parseInt(sel.value) : null;
+      correct = (given === item.ans);
+      wrap.querySelectorAll('label').forEach((lab,j)=>{
+        lab.classList.remove('border-emerald-500','bg-emerald-50','border-red-400','bg-red-50');
+        if(j===item.ans){ lab.classList.add('border-emerald-500','bg-emerald-50'); }
+        if(given===j && !correct){ lab.classList.add('border-red-400','bg-red-50'); }
+      });
+    } else {
+      const raw = document.querySelector(`input[name="q${i}"]`).value;
+      given = raw===''? null : parseFloat(raw);
+      if(given!==null){
+        const tol = Math.abs(item.ans*item.tol);
+        correct = Math.abs(given - item.ans) <= tol;
+      }
+      const inp = document.querySelector(`input[name="q${i}"]`);
+      inp.classList.remove('border-emerald-500','border-red-400');
+      inp.classList.add(correct?'border-emerald-500':'border-red-400');
+    }
+    if(correct) score++;
+    fb.classList.remove('hidden');
+    fb.innerHTML = `<div class="rounded-lg px-3 py-2 ${correct?'bg-emerald-50 text-emerald-800':'bg-red-50 text-red-800'}">
+      <b>${correct?'✔ 答對':'✘ 答錯'}</b>　正解：${item.type==='mc'?item.opts[item.ans]:item.ans}${item.unit||''}<br>
+      <span class="text-slate-600">${item.exp}</span></div>`;
+  });
+  graded = true;
+  const box = document.getElementById('scoreBox');
+  box.classList.remove('hidden');
+  const pct = Math.round(score/QUIZ.length*100);
+  const color = pct>=80?'text-emerald-600':pct>=60?'text-amber-600':'text-red-600';
+  box.className = `ml-auto text-lg font-bold ${color}`;
+  box.innerHTML = `得分：${score} / ${QUIZ.length}（${pct}%）`;
+  if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+  document.getElementById('scoreBox').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+document.getElementById('gradeBtn').addEventListener('click', grade);
+document.getElementById('resetBtn').addEventListener('click', ()=>{ renderQuiz(); document.getElementById('scoreBox').classList.add('hidden'); });
+renderQuiz();
+</script>
+</body>
+</html>
