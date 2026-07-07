@@ -37,6 +37,31 @@
   .callout-key { background:#ecfdf5; border-left:4px solid #059669; }
   details > summary { cursor:pointer; list-style:none; }
   details > summary::-webkit-details-marker { display:none; }
+
+  /* ---- readability: enlarge base font ---- */
+  html { font-size: 18px; }
+  @media (min-width: 1024px) { html { font-size: 19.5px; } }
+
+  /* ---- sectioned pager ---- */
+  main { padding-bottom: 104px !important; }
+  main > section { display: none; }
+  main > section.pg-active { display: block; animation: pgfade .28s ease; }
+  @keyframes pgfade { from { opacity:0; transform: translateX(14px); } to { opacity:1; transform:none; } }
+  .navlink.navon { background:#0d9488; color:#fff; }
+  footer { margin-bottom: 84px; }
+  .pagerbar { position:fixed; bottom:0; left:0; right:0; z-index:50; background:rgba(255,255,255,.97); backdrop-filter:blur(8px); border-top:1px solid #e2e8f0; box-shadow:0 -2px 12px rgba(0,0,0,.06); }
+  .pagerbar-inner { max-width:72rem; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:.6rem 1rem; }
+  .pgbtn { display:inline-flex; align-items:center; gap:.5rem; font-weight:700; border-radius:.7rem; padding:.6rem 1.15rem; font-size:.95rem; background:#0d9488; color:#fff; cursor:pointer; border:none; transition:background .15s; }
+  .pgbtn:hover:not(:disabled) { background:#0f766e; }
+  .pgbtn:disabled { background:#cbd5e1; color:#94a3b8; cursor:not-allowed; }
+  .pgbtn.ghost { background:#f1f5f9; color:#0f766e; }
+  .pgbtn.ghost:hover:not(:disabled) { background:#e2e8f0; }
+  .dotnav { display:flex; gap:7px; align-items:center; }
+  .dot { width:10px; height:10px; border-radius:9999px; background:#cbd5e1; cursor:pointer; transition:all .15s; }
+  .dot:hover { background:#94a3b8; }
+  .dot.active { background:#0d9488; transform:scale(1.3); }
+  /* chart containers: fixed height so responsive canvases survive display toggling */
+  .chartbox { position:relative; width:100%; height:270px; }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -141,7 +166,7 @@
         </div>
       </div>
       <div>
-        <canvas id="calChart" height="230"></canvas>
+        <div class="chartbox"><canvas id="calChart"></canvas></div>
         <p class="text-[11px] text-slate-500 mt-1 text-center">圖：檢量線與資料點（實線為 OLS 迴歸線）</p>
       </div>
     </div>
@@ -448,7 +473,7 @@
         </ul>
       </div>
       <div>
-        <canvas id="ccChart" height="230"></canvas>
+        <div class="chartbox"><canvas id="ccChart"></canvas></div>
         <p class="text-[11px] text-slate-500 mt-1 text-center">圖：空白（左）與含物質樣品（右）的訊號分布；α、β 為兩尾錯誤面積</p>
       </div>
     </div>
@@ -546,6 +571,20 @@
 
 </main>
 
+<!-- Fixed pager bar -->
+<div class="pagerbar">
+  <div class="pagerbar-inner">
+    <button id="pgPrev" class="pgbtn ghost"><i class="fa-solid fa-arrow-left"></i> 上一章</button>
+    <div class="flex flex-col items-center">
+      <div id="pgTitle" class="font-bold text-slate-700 text-sm"></div>
+      <div class="dotnav mt-1.5" id="dotNav">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+    <button id="pgNext" class="pgbtn">下一章 <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</div>
+
 <!-- Dark footer bar -->
 <footer class="bg-slate-800 text-slate-300 mt-12">
   <div class="max-w-6xl mx-auto px-6 py-6 text-sm">
@@ -566,15 +605,16 @@
 const CAL_X = [0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50];
 const CAL_Y = [3060,3522,3707,4280,5058,5510,5703,6205,7156,7178];
 const B = 9661.9, A = 2480.9;
-new Chart(document.getElementById('calChart'), {
+window.buildCal = function(){ if(window._c1) return;
+window._c1 = new Chart(document.getElementById('calChart'), {
   type:'scatter',
   data:{ datasets:[
     { label:'資料點', data:CAL_X.map((x,i)=>({x, y:CAL_Y[i]})), backgroundColor:'#0d9488', pointRadius:4 },
     { label:'迴歸線 y=9661.9x+2480.9', type:'line', data:[{x:0,y:A},{x:0.52,y:A+B*0.52}], borderColor:'#dc2626', borderWidth:2, pointRadius:0, fill:false }
   ]},
-  options:{ plugins:{legend:{labels:{boxWidth:12,font:{size:10}}}},
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
     scales:{ x:{title:{display:true,text:'濃度 x'}}, y:{title:{display:true,text:'訊號 y'}} } }
-});
+}); };
 
 /* ---------- CCα / CCβ two-distribution chart ---------- */
 function gauss(x,mu,s){ return Math.exp(-0.5*Math.pow((x-mu)/s,2)); }
@@ -585,17 +625,18 @@ for(let x=-0.06; x<=0.18; x+=0.003){
   gBlank.push(gauss(x,muB,sd));
   gSample.push(gauss(x,muS,sd));
 }
-new Chart(document.getElementById('ccChart'), {
+window.buildCC = function(){ if(window._c2) return;
+window._c2 = new Chart(document.getElementById('ccChart'), {
   type:'line',
   data:{ labels:ccLabels, datasets:[
     {label:'空白分布', data:gBlank, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.08)', fill:true, pointRadius:0, borderWidth:2, tension:.3},
     {label:'含物質樣品 (@CCβ)', data:gSample, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,.08)', fill:true, pointRadius:0, borderWidth:2, tension:.3}
   ]},
-  options:{ plugins:{legend:{labels:{boxWidth:12,font:{size:10}}},
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{boxWidth:12,font:{size:11}}},
       annotation:false,
       tooltip:{enabled:false}},
     scales:{ x:{title:{display:true,text:'訊號（→ 濃度）'}, ticks:{maxTicksLimit:7}}, y:{display:false} } }
-});
+}); };
 
 /* ---------- WLS calculator ---------- */
 const HOMO_DATA = CAL_X.map((x,i)=>`${x}, ${CAL_Y[i]}`).join('\n');
@@ -847,6 +888,46 @@ function grade(){
 document.getElementById('gradeBtn').addEventListener('click', grade);
 document.getElementById('resetBtn').addEventListener('click', ()=>{ renderQuiz(); document.getElementById('scoreBox').classList.add('hidden'); });
 renderQuiz();
+
+/* ---------- SECTIONED PAGER ---------- */
+const _pages  = Array.from(document.querySelectorAll('main > section'));
+const _titles = ['總覽','檢量線','LOD / LOQ','GUM 不確定度','CCα / CCβ','學習測驗'];
+const _hero   = document.querySelector('header');
+const _footer = document.querySelector('footer');
+const _navlinks = Array.from(document.querySelectorAll('nav a.navlink'));
+const _dots   = Array.from(document.querySelectorAll('#dotNav .dot'));
+let _cur = 0;
+
+function _syncChrome(){
+  _navlinks.forEach((a,idx)=> a.classList.toggle('navon', idx===_cur));
+  _dots.forEach((d,idx)=> d.classList.toggle('active', idx===_cur));
+  document.getElementById('pgTitle').textContent = `${_cur+1} / ${_pages.length} · ${_titles[_cur]}`;
+  document.getElementById('pgPrev').disabled = _cur===0;
+  document.getElementById('pgNext').disabled = _cur===_pages.length-1;
+  _hero.style.display   = _cur===0 ? '' : 'none';
+  _footer.style.display = _cur===_pages.length-1 ? '' : 'none';
+}
+function goPage(i){
+  i = Math.max(0, Math.min(_pages.length-1, i));
+  _cur = i;
+  _pages.forEach((p,idx)=> p.classList.toggle('pg-active', idx===i));
+  _syncChrome();
+  if(i===0 && window.buildCal) window.buildCal();   // lazy-build charts when their page is first shown (container is now sized)
+  if(i===4 && window.buildCC) window.buildCC();
+  window.scrollTo({top:0, behavior:'auto'});
+  requestAnimationFrame(()=>{ [window._c1, window._c2].forEach(c=>{ if(c){ try{ c.resize(); }catch(e){} } }); });
+}
+document.getElementById('pgPrev').addEventListener('click', ()=> goPage(_cur-1));
+document.getElementById('pgNext').addEventListener('click', ()=> goPage(_cur+1));
+_navlinks.forEach((a,idx)=> a.addEventListener('click', e=>{ e.preventDefault(); goPage(idx); }));
+_dots.forEach((d,idx)=> d.addEventListener('click', ()=> goPage(idx)));
+document.addEventListener('keydown', e=>{
+  const tag = document.activeElement ? document.activeElement.tagName : '';
+  if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;   // don't hijack calculator/quiz typing
+  if(e.key==='ArrowRight' || e.key==='PageDown'){ e.preventDefault(); goPage(_cur+1); }
+  else if(e.key==='ArrowLeft' || e.key==='PageUp'){ e.preventDefault(); goPage(_cur-1); }
+});
+goPage(0);
 </script>
 </body>
 </html>
