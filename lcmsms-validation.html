@@ -62,6 +62,11 @@
   .dot.active { background:#0d9488; transform:scale(1.3); }
   /* chart containers: fixed height so responsive canvases survive display toggling */
   .chartbox { position:relative; width:100%; height:270px; }
+  /* beginner-friendly boxes */
+  .plain { background:#fff7ed; border:1.5px dashed #fb923c; border-radius:.9rem; padding:1rem 1.25rem; }
+  .plain .lead2 { color:#c2410c; font-weight:800; font-size:1.08rem; }
+  .analogy { background:#eff6ff; border-left:4px solid #3b82f6; border-radius:.6rem; padding:.8rem 1.05rem; }
+  .analogy b { color:#1d4ed8; }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -73,7 +78,7 @@
 <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
   <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3 overflow-x-auto">
     <span class="font-bold text-teal-700 text-sm whitespace-nowrap"><i class="fa-solid fa-flask-vial"></i> LC-MS/MS 確效</span>
-    <a href="#s0" class="navlink">總覽</a>
+    <a href="#s0" class="navlink">導論</a>
     <a href="#s1" class="navlink">檢量線</a>
     <a href="#s2" class="navlink">LOD / LOQ</a>
     <a href="#s3" class="navlink">GUM 不確定度</a>
@@ -102,7 +107,30 @@
 
 <!-- =============== SECTION 0 : OVERVIEW =============== -->
 <section id="s0" class="scroll-mt-20">
-  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map text-teal-600"></i> 0. 課程總覽：確效參數的邏輯地圖</h2>
+  <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map text-teal-600"></i> 0. 先讀我：這門課在學什麼</h2>
+
+  <div class="plain mt-4">
+    <p class="lead2">🔰 先別緊張，用一個場景開始</p>
+    <p class="text-sm mt-2">想像你是<b>食品檢驗實驗室的新進人員</b>。今天桌上有一批進口蜂蜜，主管丟給你三個問題：</p>
+    <ul class="text-sm mt-2 space-y-1 list-disc ml-5">
+      <li>「這批蜂蜜<b>到底有沒有</b>驗出農藥？」</li>
+      <li>「如果有，<b>是多少 ppm</b>？這個數字<b>可信嗎</b>、誤差多大？」</li>
+      <li>「這個結果能不能拿去<b>開罰單／退貨</b>？萬一冤枉了人怎麼辦？」</li>
+    </ul>
+    <p class="text-sm mt-2">這門課就是教你用<b>統計證據</b>回答這三個問題。你<b>不需要是數學高手</b>——每個公式我們都會拆開、配生活比喻，一步一步帶。看到公式先別跳過，先看它下面的「🔰 白話」或「🌰 比喻」框就懂了。</p>
+  </div>
+
+  <div class="card p-6 mt-4">
+    <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-seedling text-emerald-600"></i> 開始前，60 秒複習 4 個統計小詞</h3>
+    <p class="text-sm text-slate-500 mb-3">全課就反覆用到這幾個概念，先有感覺就好，不用背公式。</p>
+    <div class="grid md:grid-cols-2 gap-3 text-sm">
+      <div class="analogy"><b>① 平均值 (mean, \(\bar x\))</b><br>同一個東西量很多次，全部加起來除以次數。就是「最有代表性的那個數」。</div>
+      <div class="analogy"><b>② 標準差 (standard deviation, s)</b><br>那些量測值「散得多開」。射靶時彈著點越集中、標準差越小＝越穩定。<b>這是全課主角</b>：它代表「隨機雜訊有多大」。</div>
+      <div class="analogy"><b>③ 常態分布（鐘形曲線）</b><br>量測值大多擠在平均值附近、越往兩邊越少，畫出來像一座鐘 🔔。隨機雜訊通常長這樣。</div>
+      <div class="analogy"><b>④ 機率 α、β</b><br>就是「犯錯的機會有多大」。α = 5% 白話講就是「大概每 20 次會錯 1 次」。</div>
+    </div>
+  </div>
+
   <div class="card p-6 mt-4">
     <p class="mb-4">方法確效（<span class="en">method validation</span>）的核心，是用統計證據回答兩個問題：<b>「這個訊號是不是分析物？」</b>與<b>「這個數值有多可信？」</b>。四大參數彼此環環相扣，全部建立在同一條檢量線與其殘差之上：</p>
 
@@ -177,6 +205,13 @@
 <section id="s1" class="scroll-mt-20">
   <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-chart-line text-teal-600"></i> 1. 檢量線與最小平方迴歸</h2>
 
+  <div class="plain mt-4">
+    <p class="lead2">🔰 白話：檢量線就是儀器的「翻譯對照表」</p>
+    <p class="text-sm mt-2">LC-MS/MS 儀器其實<b>不會直接告訴你濃度</b>，它只會吐出一個<b>訊號數字</b>（例如波峰面積 = 58000）。這個數字本身沒意義——你需要一張「對照表」把訊號翻成濃度，這張表就是<b>檢量線</b>。</p>
+    <div class="analogy mt-3 text-sm"><b>🌡️ 像溫度計的刻度：</b>水銀柱的高度（訊號）本身只是一段長度，是旁邊的刻度（檢量線）讓它變成「25°C」。做法是：先拿<b>已知濃度</b>的標準品去量、記下對應訊號，畫成一條線；之後未知樣品量到訊號，就沿這條線<b>反查</b>濃度。</div>
+    <p class="text-sm mt-3">這條線通常是直線 \(y=a+bx\)：<b>x = 濃度</b>、<b>y = 訊號</b>。斜率 <b>b</b>＝「濃度每加一點、訊號跳多高」（就是<span class="keyword">靈敏度</span>，線越陡越靈敏）；截距 <b>a</b>＝「濃度為 0 時的背景訊號」。下面的公式只是「怎麼用一堆點畫出最貼合的那條線」，看不懂公式沒關係，記住這個畫面即可。</p>
+  </div>
+
   <div class="card p-6 mt-4 space-y-4">
     <h3 class="font-bold text-slate-700">1.1 線性模型與 OLS 估計式</h3>
     <p class="text-sm">假設回應值與濃度呈線性：</p>
@@ -189,10 +224,12 @@
     <p class="text-sm"><b>殘差標準差</b>（residual standard deviation，也稱迴歸的標準誤 \(S_{y,x}\)）是後續一切 LOD／不確定度計算的核心：</p>
     <div class="eqbox">\[ S_{y,x}=\hat\sigma=\sqrt{\dfrac{\sum_i\left(y_i-\hat y_i\right)^2}{I-2}}\qquad(\hat y_i=a+bx_i) \]</div>
     <p class="text-sm">分母的 \(I-2\)（本例 \(=8\)）是自由度：扣掉斜率與截距兩個估計參數。決定係數 \(R^2\) 只表示線性擬合好壞，<b>不能</b>單獨用來判斷是否「夠線性」——高 \(R^2\) 仍可能有系統性彎曲（見 Evard Part II，Fig.1）。</p>
+    <div class="analogy text-sm"><b>🎯 \(S_{y,x}\) 一句話：</b>資料點不會乖乖全部落在線上，總會上下亂跳一點點。\(S_{y,x}\) 就是量「這些點平均離線多遠」＝<b>你方法的雜訊大小</b>。它<b>越小＝方法越穩、越能看到低濃度</b>。請記住這個數，後面的 LOD、LOQ、不確定度、CCα/CCβ 幾乎全都靠它算出來。</div>
   </div>
 
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">1.2 變異齊一性：Homoscedasticity vs Heteroscedasticity</h3>
+    <div class="analogy text-sm"><b>⚖️ 白話（體重計比喻）：</b>有些秤量很輕的東西很準，量很重時誤差就變大。分析儀器也一樣——<b>濃度越高、訊號的隨機跳動通常越大</b>。這種「誤差隨濃度變大」叫<b>變異異質（hetero）</b>；反之從頭到尾誤差都差不多叫<b>變異齊一（homo）</b>。LC-MS/MS 幾乎都是異質的。<b>為什麼要在意？</b>畫線時如果不理它，低濃度那端會被高濃度的大跳動「拉歪」，害你 LOD 算錯。名詞可以先記住這個畫面就好。</div>
     <p class="text-sm"><span class="keyword">變異齊一（homoscedastic）</span>指殘差變異不隨濃度改變；<span class="keyword">變異異質（heteroscedastic）</span>指高濃度的變異較大。<b>LC-MS/MS 資料幾乎總是異質的</b>（Evard Part II）：訊號越大、絕對變異越大。Van Loco (2007) 更指出殘留分析中「異質性無所不在」。</p>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div class="callout callout-info">
@@ -264,6 +301,17 @@
 <section id="s2" class="scroll-mt-20">
   <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-ruler-horizontal text-teal-600"></i> 2. 偵測極限 LOD 與定量極限 LOQ</h2>
 
+  <div class="plain mt-4">
+    <p class="lead2">🔰 白話：LOD 和 LOQ 差在哪？</p>
+    <p class="text-sm mt-2">想像你在<b>昏暗的房間</b>裡看東西：</p>
+    <ul class="text-sm mt-2 space-y-1 list-disc ml-5">
+      <li><b>LOD（偵測極限）＝「我確定那裡有個東西」</b>的最低亮度。看得到有東西，但還數不清是幾個、多大。</li>
+      <li><b>LOQ（定量極限）＝「我不但看到，還能清楚報出數字」</b>的最低亮度。通常比 LOD 高一截、光線更足。</li>
+    </ul>
+    <div class="analogy mt-3 text-sm"><b>🔊 另一個比喻（吵雜餐廳）：</b>朋友講話要比背景噪音<b>大到一定程度</b>你才聽得清。分析上「聲音 vs 噪音」的比值就是<b>訊噪比 S/N</b>：慣例 <b>S/N ≥ 3 當 LOD</b>、<b>S/N ≥ 10 當 LOQ</b>。</div>
+    <p class="text-sm mt-3">為什麼結果不能只寫「未檢出」？因為「沒看到」不等於「沒有」——可能只是低於你的偵測能力。正確做法是<b>寫「低於 LOD」並附上 LOD 數值</b>，別人才知道你的方法能看到多低。</p>
+  </div>
+
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">2.1 定義與常見混淆</h3>
     <p class="text-sm">LOD＝在測試樣品中「能與零可靠區分」的最小濃度。困難在於：這個定義<b>沒有</b>明確說明要不要同時考慮偽陽性與偽陰性。Evard (Part I) 因此建議——嚴謹來說 LOD 應等同同時考量兩型錯誤，也就是接近 <b>CCβ</b> 的意義；許多指引只把 LOD 當成只考慮偽陽性（相當於 CCα），這會導致不同方法的 LOD 無法嚴格互相比較。</p>
@@ -329,6 +377,13 @@
 <section id="s3" class="scroll-mt-20">
   <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-teal-600"></i> 3. ISO GUM 量測不確定度</h2>
 
+  <div class="plain mt-4">
+    <p class="lead2">🔰 白話：不確定度就是「大概 ±多少」</p>
+    <p class="text-sm mt-2">你在菜市場買半斤肉，攤販的秤顯示「300 克」。但你心裡有數——這台秤大概<b>±5 克</b>跑不掉。這個「±5 克」就是<b>量測不確定度</b>：它老實承認「我的數字不是絕對精準，真值大概落在這個範圍裡」。</p>
+    <div class="analogy mt-3 text-sm"><b>🎯 誤差 vs 不確定度（射飛鏢）：</b><b>誤差</b>是「這一鏢離紅心多遠」（射完才知道，而且真值我們其實不曉得）；<b>不確定度</b>是「以我的技術，鏢大概會散布成多大一圈」——事前就能估的「散布範圍」。GUM 處理的是後者。</div>
+    <p class="text-sm mt-3">GUM 就是一套<b>國際公認的標準算法</b>，教你把各個來源的誤差（稱重、稀釋、回收率…）<b>合起來</b>，最後給一個 <b>結果 ± U</b>。ISO 17025 認證實驗室的報告一定要附這個 U。下面看起來公式很多，其實只在做一件事：<b>把每個誤差換成同單位、平方相加、開根號、再乘 2</b>。</p>
+  </div>
+
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">3.1 GUM 是什麼？為什麼需要它</h3>
     <p class="text-sm"><span class="keyword">GUM</span>（Guide to the Expression of Uncertainty in Measurement，ISO/IEC Guide 98-3；等同 JCGM 100:2008）是量測不確定度評估的國際共通框架。它回答：<b>「這個結果 \(\pm\) 多少，才有 95% 的把握涵蓋真值？」</b>。任何 ISO 17025 認證實驗室的報告都必須附上擴充不確定度 \(U\)。</p>
@@ -350,6 +405,7 @@
 
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">3.3 Type A vs Type B 評估</h3>
+    <div class="analogy text-sm mb-1"><b>白話：</b>不確定度的來源只有兩種取得方式——<b>Type A＝自己量很多次、用統計算出來</b>（像量 10 次看散布）；<b>Type B＝不用自己量、查來的</b>（看儀器說明書、校正證書、規格書）。兩者地位一樣、最後會合在一起，命名只是告訴你「這個數字怎麼來的」。</div>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div class="callout callout-info">
         <b>Type A（統計法）</b>
@@ -413,6 +469,21 @@
 <!-- =============== SECTION 4 : CCα / CCβ =============== -->
 <section id="s4" class="scroll-mt-20">
   <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-teal-600"></i> 4. 歐盟 CCα（決定極限）與 CCβ（偵測能力）</h2>
+
+  <div class="plain mt-4">
+    <p class="lead2">🔰 白話：世界上有「兩種犯錯的方式」</p>
+    <p class="text-sm mt-2">這是全課最重要、也最好懂的觀念。想像醫院做一個疾病篩檢，可能出兩種錯：</p>
+    <div class="grid md:grid-cols-2 gap-3 mt-2 text-sm">
+      <div class="analogy" style="border-color:#dc2626;background:#fef2f2"><b style="color:#b91c1c">偽陽性 = α 錯誤</b><br>其實<b>沒病</b>卻被判「有病」。→ 白白受驚、冤枉好人。對應檢驗：<b>乾淨的樣品被誤判成違規</b>。</div>
+      <div class="analogy"><b>偽陰性 = β 錯誤</b><br>其實<b>有病</b>卻被判「沒病」。→ 漏掉真正的病人。對應檢驗：<b>真的含農藥卻沒驗出、放行了</b>。</div>
+    </div>
+    <p class="text-sm mt-3">好方法要<b>同時</b>把這兩種錯壓低。<b>CCα 和 CCβ 就是把這兩個機率寫死的兩條濃度線：</b></p>
+    <ul class="text-sm mt-1 space-y-1 list-disc ml-5">
+      <li><b>CCα（決定極限）＝「判定門檻線」。</b>訊號要高過它我才敢喊「檢出！」，這樣冤枉好人的機率只有 α（例如 1%）。像海關 X 光機的警報門檻——設太低就一直誤報。</li>
+      <li><b>CCβ（偵測能力）＝「保證抓得到的濃度」。</b>當農藥真的達到這個濃度，我的方法有 <b>1−β</b>（例如 95%）把握會驗出來、不會漏掉。</li>
+    </ul>
+    <div class="analogy mt-3 text-sm"><b>為什麼法規要用這個、不用 LOD？</b>因為開罰單／銷毀貨品是<b>可能上法院的重大決定</b>，必須同時控管「冤枉好人」和「放走壞人」兩種風險。LOD 只顧到一半，所以歐盟 2002/657/EC 規定禁藥檢驗一定要用 CCα／CCβ。下面是把這兩條線精確算出來的公式。</div>
+  </div>
 
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">4.1 兩型錯誤與假說檢定基礎</h3>
@@ -503,6 +574,7 @@
   <div class="card p-6 mt-4">
     <h3 class="font-bold text-slate-700 mb-2"><i class="fa-solid fa-repeat text-purple-600"></i> 4.5 加權迭代 CCα／CCβ 完整算例（Van Loco 2007）</h3>
     <p class="text-sm">當殘留分析資料為<b>異質（heteroscedastic）</b>時，臨界濃度處的標準差本身會隨濃度改變——而那個濃度正是我們要求的 CCα／CCβ。於是形成一個「答案出現在自己公式裡」的<b>固定點問題（fixed-point）</b>，必須<b>迭代求解</b>。Van Loco 的做法：</p>
+    <div class="analogy text-sm"><b>🔁 迭代白話：</b>就像拿計算機一直重複按同一個運算——先隨便猜一個答案代進去、算出新答案、再把新答案代回去…重複到<b>數字幾乎不再變動</b>為止，那個穩定下來的數就是解。工程上很常見，不可怕。下面的互動求解器會把每一輪的數字列出來給你看它怎麼「收斂」。</div>
 
     <div class="grid md:grid-cols-2 gap-4 mt-3 text-sm">
       <div class="callout callout-key">
@@ -556,10 +628,10 @@
 <section id="s5" class="scroll-mt-20">
   <div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl px-6 py-4 flex items-center justify-between">
     <h2 class="text-2xl font-bold flex items-center gap-2"><i class="fa-solid fa-clipboard-question"></i> 5. 學習測驗</h2>
-    <span class="text-sm bg-white/20 rounded-full px-3 py-1" id="progressBadge">0 / 17</span>
+    <span class="text-sm bg-white/20 rounded-full px-3 py-1" id="progressBadge">0 / 20</span>
   </div>
   <div class="card rounded-t-none p-6">
-    <p class="text-sm text-slate-600 mb-4">共 17 題（概念 + 計算）。作答後按下方「批改」看分數與詳解。計算題容許 ±5% 誤差。</p>
+    <p class="text-sm text-slate-600 mb-4">共 20 題（含 3 題生活觀念題 + 概念 + 計算）。作答後按下方「批改」看分數與詳解。計算題容許 ±5% 誤差。</p>
     <div id="quizContainer" class="space-y-6"></div>
     <div class="mt-6 flex flex-wrap items-center gap-3">
       <button id="gradeBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-lg shadow"><i class="fa-solid fa-check-double"></i> 批改</button>
@@ -801,6 +873,18 @@ const QUIZ = [
   { type:'mc', q:'17. Van Loco (2007) 在異質資料下計算加權 CCα/CCβ 時必須「迭代求解」，根本原因是？',
     opts:['電腦精度不足','臨界濃度處的標準差 S=(a′+b′·CC) 本身取決於待求的 CC 值，形成固定點問題','t 分布沒有公式解','斜率是負的'], ans:1,
     exp:'變異函數 S(X)=a′+b′X 使得 CCα/CCβ 公式裡的 S 依賴於答案本身，答案出現在自己的式子中（fixed-point），只能反覆代入直到收斂。' },
+
+  { type:'mc', q:'18.【觀念】檢量線（calibration curve）在整個分析中扮演什麼角色？',
+    opts:['直接顯示樣品是否合格','把儀器吐出的「訊號」翻譯成「濃度」的對照表','清洗儀器的程序','計算樣品重量'], ans:1,
+    exp:'儀器只給訊號數字（如波峰面積），檢量線就像溫度計的刻度，把訊號反查成濃度。斜率＝靈敏度、截距＝背景。' },
+
+  { type:'mc', q:'19.【觀念】食品檢驗中「偽陰性（β 錯誤）」代表下列哪種情況？',
+    opts:['乾淨的樣品被誤判成違規','真的含有農藥卻沒驗出、放行了','儀器當機','標準品過期'], ans:1,
+    exp:'偽陰性＝有問題卻沒抓到（漏網之魚）；偽陽性（α）才是把乾淨樣品冤枉成違規。CCβ 就是用來控制偽陰性、確保夠低濃度也抓得到。' },
+
+  { type:'mc', q:'20.【觀念】報告寫「c = 0.100 ± 0.014 mg/kg（k=2）」，其中「± 0.014」是什麼意思？',
+    opts:['一定有 0.014 的錯誤','真值大概落在這個範圍內（約 95% 信心）的量測不確定度','儀器的價格','檢量線的斜率'], ans:1,
+    exp:'± 0.014 是擴充不確定度 U，代表「以約 95% 把握，真值落在 0.100±0.014 之間」。它是誠實揭露結果的可信範圍，不是說一定錯這麼多。' },
 ];
 
 const container = document.getElementById('quizContainer');
@@ -891,7 +975,7 @@ renderQuiz();
 
 /* ---------- SECTIONED PAGER ---------- */
 const _pages  = Array.from(document.querySelectorAll('main > section'));
-const _titles = ['總覽','檢量線','LOD / LOQ','GUM 不確定度','CCα / CCβ','學習測驗'];
+const _titles = ['導論','檢量線','LOD / LOQ','GUM 不確定度','CCα / CCβ','學習測驗'];
 const _hero   = document.querySelector('header');
 const _footer = document.querySelector('footer');
 const _navlinks = Array.from(document.querySelectorAll('nav a.navlink'));
