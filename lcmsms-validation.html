@@ -39,8 +39,8 @@
   details > summary::-webkit-details-marker { display:none; }
 
   /* ---- readability: enlarge base font ---- */
-  html { font-size: 18px; }
-  @media (min-width: 1024px) { html { font-size: 19.5px; } }
+  html { font-size: 19.5px; }
+  @media (min-width: 1024px) { html { font-size: 21.5px; } }
 
   /* ---- sectioned pager ---- */
   main { padding-bottom: 104px !important; }
@@ -334,6 +334,60 @@
   <div class="card p-6 mt-4 space-y-3">
     <h3 class="font-bold text-slate-700">1.2 變異齊一性：Homoscedasticity vs Heteroscedasticity</h3>
     <div class="analogy text-sm"><b>⚖️ 白話（體重計比喻）：</b>有些秤量很輕的東西很準，量很重時誤差就變大。分析儀器也一樣——<b>濃度越高、訊號的隨機跳動通常越大</b>。這種「誤差隨濃度變大」叫<b>變異異質（hetero）</b>；反之從頭到尾誤差都差不多叫<b>變異齊一（homo）</b>。LC-MS/MS 幾乎都是異質的。<b>為什麼要在意？</b>畫線時如果不理它，低濃度那端會被高濃度的大跳動「拉歪」，害你 LOD 算錯。名詞可以先記住這個畫面就好。</div>
+
+    <div class="viz">
+      <p class="viz-cap">🎬 兩張檢量線比一比：每個濃度點量幾次，看誤差棒（散布）怎麼變</p>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <svg viewBox="0 0 300 200" role="img" aria-label="齊一檢量線：各濃度誤差棒長度一致">
+            <line x1="42" y1="12" x2="42" y2="170" stroke="#94a3b8"/>
+            <line x1="42" y1="170" x2="288" y2="170" stroke="#94a3b8"/>
+            <text x="14" y="14" font-size="11" fill="#334155">訊號 y</text>
+            <text x="250" y="188" font-size="11" fill="#334155">濃度 x →</text>
+            <line x1="45" y1="155" x2="280" y2="40" stroke="#0d9488" stroke-width="2.5"/>
+            <g stroke="#0d9488" stroke-width="1.5">
+              <line x1="70" y1="135" x2="70" y2="155"/><line x1="66" y1="135" x2="74" y2="135"/><line x1="66" y1="155" x2="74" y2="155"/>
+              <line x1="110" y1="110" x2="110" y2="130"/><line x1="106" y1="110" x2="114" y2="110"/><line x1="106" y1="130" x2="114" y2="130"/>
+              <line x1="150" y1="96" x2="150" y2="116"/><line x1="146" y1="96" x2="154" y2="96"/><line x1="146" y1="116" x2="154" y2="116"/>
+              <line x1="190" y1="71" x2="190" y2="91"/><line x1="186" y1="71" x2="194" y2="71"/><line x1="186" y1="91" x2="194" y2="91"/>
+              <line x1="230" y1="57" x2="230" y2="77"/><line x1="226" y1="57" x2="234" y2="57"/><line x1="226" y1="77" x2="234" y2="77"/>
+              <line x1="265" y1="35" x2="265" y2="55"/><line x1="261" y1="35" x2="269" y2="35"/><line x1="261" y1="55" x2="269" y2="55"/>
+            </g>
+            <g fill="#0d9488">
+              <circle cx="70" cy="145" r="3.5"/><circle cx="110" cy="120" r="3.5"/><circle cx="150" cy="106" r="3.5"/>
+              <circle cx="190" cy="81" r="3.5"/><circle cx="230" cy="67" r="3.5"/><circle cx="265" cy="45" r="3.5"/>
+            </g>
+          </svg>
+          <p class="text-center text-sm font-bold text-teal-700 mt-1">✅ 齊一（homoscedastic）</p>
+          <p class="text-center text-xs text-slate-500">誤差棒從低到高濃度<b>一樣長</b> → 直接用 OLS</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 300 200" role="img" aria-label="異質檢量線：誤差棒隨濃度變大呈喇叭狀">
+            <line x1="42" y1="12" x2="42" y2="170" stroke="#94a3b8"/>
+            <line x1="42" y1="170" x2="288" y2="170" stroke="#94a3b8"/>
+            <text x="14" y="14" font-size="11" fill="#334155">訊號 y</text>
+            <text x="250" y="188" font-size="11" fill="#334155">濃度 x →</text>
+            <line x1="45" y1="155" x2="280" y2="40" stroke="#d97706" stroke-width="2.5"/>
+            <g stroke="#d97706" stroke-width="1.5">
+              <line x1="70" y1="139" x2="70" y2="147"/><line x1="66" y1="139" x2="74" y2="139"/><line x1="66" y1="147" x2="74" y2="147"/>
+              <line x1="110" y1="115" x2="110" y2="127"/><line x1="106" y1="115" x2="114" y2="115"/><line x1="106" y1="127" x2="114" y2="127"/>
+              <line x1="150" y1="98" x2="150" y2="116"/><line x1="146" y1="98" x2="154" y2="98"/><line x1="146" y1="116" x2="154" y2="116"/>
+              <line x1="190" y1="66" x2="190" y2="92"/><line x1="186" y1="66" x2="194" y2="66"/><line x1="186" y1="92" x2="194" y2="92"/>
+              <line x1="230" y1="54" x2="230" y2="90"/><line x1="226" y1="54" x2="234" y2="54"/><line x1="226" y1="90" x2="234" y2="90"/>
+              <line x1="265" y1="13" x2="265" y2="61"/><line x1="261" y1="13" x2="269" y2="13"/><line x1="261" y1="61" x2="269" y2="61"/>
+            </g>
+            <g fill="#d97706">
+              <circle cx="70" cy="143" r="3.5"/><circle cx="110" cy="121" r="3.5"/><circle cx="150" cy="107" r="3.5"/>
+              <circle cx="190" cy="79" r="3.5"/><circle cx="230" cy="72" r="3.5"/><circle cx="265" cy="37" r="3.5"/>
+            </g>
+          </svg>
+          <p class="text-center text-sm font-bold text-amber-700 mt-1">⚠️ 異質（heteroscedastic）</p>
+          <p class="text-center text-xs text-slate-500">誤差棒<b>越往高濃度越長</b>（喇叭狀）→ 用 WLS 加權</p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 text-center mt-2">同一條檢量線，每個濃度重複量幾次得到「誤差棒」。<b>LC-MS/MS 幾乎都是右圖</b>：高濃度跳動大。若右圖硬用 OLS，那幾個大跳動的高濃度點會把線「拉歪」，害低濃度端（也就是 LOD 附近）算不準。</p>
+    </div>
+
     <p class="text-sm"><span class="keyword">變異齊一（homoscedastic）</span>指殘差變異不隨濃度改變；<span class="keyword">變異異質（heteroscedastic）</span>指高濃度的變異較大。<b>LC-MS/MS 資料幾乎總是異質的</b>（Evard Part II）：訊號越大、絕對變異越大。Van Loco (2007) 更指出殘留分析中「異質性無所不在」。</p>
     <div class="grid md:grid-cols-2 gap-4 text-sm">
       <div class="callout callout-info">
