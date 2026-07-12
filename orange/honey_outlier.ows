@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="蜂蜜摻假 — 離群偵測 (教學模擬)" description="教學模擬蜂蜜 NIR。載入 data/honey_nir_orange.tab（label = pure/adulterated 已是 class）。PCA → Scatter Plot 依 label 上色，看摻假樣本是否偏離純蜜群。Outliers widget 自動標記。⚠ 資料為教學合成，不可用於真實蜂蜜鑑別。免 add-on。">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — honey_nir_orange.tab" position="(100.0, 240.0)" />
+		<node id="1" name="PCA" qualified_name="Orange.widgets.unsupervised.owpca.OWPCA" project_name="Orange3" version="" title="PCA" position="(320.0, 150.0)" />
+		<node id="2" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="Score Plot（color = label）" position="(560.0, 120.0)" />
+		<node id="3" name="Outliers" qualified_name="Orange.widgets.data.owoutliers.OWOutliers" project_name="Orange3" version="" title="Outliers（Elliptic Envelope）" position="(320.0, 350.0)" />
+		<node id="4" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="標記離群（color = Outlier）" position="(560.0, 350.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="1" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="0" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="3" sink_node_id="4" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 20.0, 560.0, 92.0)" font-family="Helvetica" font-size="13">觀念：只用純蜜建模，摻假樣本會落在模型外（Q 殘差高）= SIMCA / one-class。
+Orange 內建沒有 Q 殘差與 SIMCA；這裡用 PCA 散布圖（看 label 是否分開）＋ Outliers widget 近似。
+完整的『Q 隨摻假比例上升』請用 Python notebook。⚠ 資料為教學合成。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties />
+</scheme>

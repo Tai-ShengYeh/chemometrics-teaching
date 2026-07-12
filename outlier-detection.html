@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>離群值偵測：Hotelling T² 與 Q 殘差 — NIR 食品分析</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');font-weight:900;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');font-weight:700;font-display:swap;}
+@font-face{font-family:'GenSeki';src:url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');font-weight:500;font-display:swap;}
+:root{--paper:#FAF7EE;--paper2:#F2EDDC;--ink:#1A1A1A;--ink-soft:#403a30;--teal:#0E7C7B;--coral:#E36414;--gold:#C8941F;--line:#D9D2BE;--blue:#1D75D8;}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:'GenSeki','Noto Sans TC',system-ui,sans-serif;font-weight:500;color:var(--ink);background:var(--paper);line-height:1.65;font-size:18px} h1,h2,h3{font-weight:900;line-height:1.2;letter-spacing:.01em} a{color:var(--teal);text-decoration:none} a:hover{text-decoration:underline} code,pre,kbd{font-family:'JetBrains Mono','Fira Code',Consolas,monospace}
+nav{position:sticky;top:0;z-index:50;background:rgba(26,26,26,.96);backdrop-filter:blur(6px);display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 22px} nav .brand{color:#fff;font-weight:900;font-size:18px;margin-right:auto} nav .brand b{color:var(--gold)} nav a{color:#e9e4d6;font-weight:700;font-size:14.5px;padding:6px 11px;border-radius:8px} nav a:hover{background:rgba(255,255,255,.12);text-decoration:none;color:#fff}
+.hero{background:var(--ink);color:var(--paper);padding:84px 22px 70px;text-align:center}.hero h1{font-size:clamp(32px,6vw,60px);margin:0 0 14px}.hero h1 .accent{color:var(--coral)}.hero p.sub{font-size:clamp(17px,2.4vw,24px);color:#cfc8b6;font-weight:700;max-width:880px;margin:0 auto 28px}.facts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}.fact{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:14px 20px;min-width:150px}.fact b{display:block;font-size:30px;color:var(--gold);font-weight:900}.fact span{font-size:14px;color:#cfc8b6;font-weight:700}
+main{max-width:1080px;margin:0 auto;padding:0 22px} section{padding:60px 0 8px;scroll-margin-top:64px;border-top:1px solid var(--line)} section:first-of-type{border-top:none}.kicker{color:var(--coral);font-weight:900;font-size:15px;letter-spacing:.14em;text-transform:uppercase} section h2{font-size:clamp(27px,4vw,40px);margin:6px 0 8px} section h3{font-size:23px;margin:34px 0 10px;color:var(--teal)} p{margin:14px 0}.lead{font-size:20px;color:var(--ink-soft)}
+.grid{display:grid;gap:18px;margin:24px 0}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.card{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px}.card h4{margin:0 0 8px;font-size:19px;font-weight:900;color:var(--teal)}.card.coral h4{color:var(--coral)}.card .big{font-size:34px;font-weight:900;color:var(--coral);line-height:1;margin:4px 0 6px}.badge{display:inline-block;background:#e4f3f2;color:var(--teal);border:1px solid #c8e3df;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:900;margin:2px 4px 2px 0}
+figure{margin:26px 0;background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center} figure img,figure svg{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto} figcaption{font-size:15px;color:var(--ink-soft);font-weight:700;margin-top:10px}.callout{border-left:6px solid var(--teal);background:var(--paper2);border-radius:0 14px 14px 0;padding:18px 22px;margin:24px 0;font-size:18px}.callout.coral{border-color:var(--coral)}.callout.gold{border-color:var(--gold)}.callout .tag{font-weight:900;color:var(--teal)}.callout.coral .tag{color:var(--coral)}.callout.gold .tag{color:var(--gold)}
+pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;border:1px solid #2c313a} pre code{display:block;padding:20px 22px;font-size:14.5px;line-height:1.6;background:transparent}.flow{background:#1f2329;color:#e9e4d6;border-radius:14px;padding:20px;overflow:auto;font-size:13.5px;line-height:1.5} table{width:100%;border-collapse:collapse;margin:24px 0;font-size:16.5px;background:var(--paper2);border-radius:14px;overflow:hidden} th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top} th{background:var(--teal);color:#fff;font-weight:900} tr:last-child td{border-bottom:none}.eq{background:var(--paper2);border:1px dashed var(--teal);border-radius:12px;padding:14px 18px;margin:18px 0;text-align:center;font-size:20px}.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.btn{background:var(--teal);color:#fff;font-weight:900;padding:12px 20px;border-radius:12px;font-size:15px}.btn.coral{background:var(--coral)}.btn.gold{background:var(--gold);color:#1A1A1A}.btn:hover{text-decoration:none;opacity:.92} footer{background:var(--ink);color:#cfc8b6;padding:40px 22px;margin-top:60px;text-align:center;font-size:14px} footer b{color:var(--gold)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}.two .box{border-radius:14px;padding:20px;border:1px solid var(--line)}.two .t2{background:#e9f0ff;border-color:#c3d6f7}.two .q{background:#fdeede;border-color:#f3d3ac}.two .box h4{margin:0 0 6px;font-size:20px}.two .t2 h4{color:var(--blue)}.two .q h4{color:var(--coral)}
+/* quiz */
+.quiz{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:8px 22px 22px}.q{padding:18px 0;border-bottom:1px solid var(--line)}.q:last-child{border-bottom:none}.q .stem{font-weight:700;margin:0 0 12px}.q .stem b{color:var(--coral)}.opt{display:block;background:var(--paper);border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;margin:8px 0;cursor:pointer;transition:.12s;font-size:16.5px}.opt:hover{border-color:var(--teal)}.opt.sel{border-color:var(--teal);background:#e4f3f2}.opt.correct{border-color:#1a9c5b;background:#e2f6ea}.opt.wrong{border-color:#d64545;background:#fbe4e4}.exp{display:none;margin:10px 0 0;padding:12px 15px;border-radius:10px;background:#fff8e7;border-left:5px solid var(--gold);font-size:15.5px}.exp.show{display:block}
+.conf{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink-soft);margin:6px 0 0}.conf button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 11px;cursor:pointer;font-family:inherit}.conf button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+#scorebar{position:sticky;bottom:0;background:var(--ink);color:#fff;border-radius:14px;padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:18px}#scorebar b{color:var(--gold);font-size:22px}
+@media(max-width:760px){.g3,.g2,.two{grid-template-columns:1fr} body{font-size:17px} nav .brand{width:100%}}
+</style>
+</head>
+<body>
+<nav><span class="brand">NIR × 食品分析 <b>·</b> 離群值偵測</span><a href="./">課程入口</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a><a href="#quiz">測驗</a></nav>
+<header class="hero">
+  <h1>離群值偵測：<span class="accent">Hotelling T²</span> 與 Q 殘差</h1>
+  <p class="sub">在近紅外光譜裡找出「怪怪的樣本」——是儀器出錯、樣本異常，還是食品被摻假？用兩個資料集學會分辨兩種完全不同的離群。</p>
+  <div class="facts"><div class="fact"><b>Corn</b><span>80 樣本 × 3 儀器</span></div><div class="fact"><b>T² vs Q</b><span>兩種離群</span></div><div class="fact"><b>影響圖</b><span>一眼看懂</span></div><div class="fact"><b>蜂蜜</b><span>摻假 = Q 離群</span></div></div>
+</header>
+<main>
+
+<section id="why"><span class="kicker">為什麼要學</span><h2>離群樣本會毀掉一個好模型</h2>
+<p class="lead">建 PCA / PLS 校正模型前，第一件事是檢查有沒有離群樣本。一個裝錯、量錯、或被摻假的樣本，會把回歸線整條拉歪、把主成分方向帶偏。但「離群」不是只有一種——這一章要教你分辨兩種，並用一張<b>影響圖</b>同時看到它們。</p>
+<div class="two">
+  <div class="box t2"><h4>① Hotelling T²（模型內）</h4><p style="margin:6px 0">在主成分方向上「太極端」的樣本。形狀對、但強度落在群體邊緣——高 <b>leverage</b>，會像槓桿一樣撬動模型。</p><p style="margin:6px 0;font-size:15px;color:var(--ink-soft)">幾何：離群心太遠，但仍貼在主成分超平面上。</p></div>
+  <div class="box q"><h4>② Q 殘差 / SPE（模型外）</h4><p style="margin:6px 0">模型「解釋不掉」的樣本：帶有主成分沒見過的新訊號。最典型就是<b>摻假 / 汙染 / 拿錯樣品</b>。</p><p style="margin:6px 0;font-size:15px;color:var(--ink-soft)">幾何：偏離主成分超平面，殘差特別大。</p></div>
+</div>
+<div class="eq" id="eq-t2"></div>
+<p style="font-size:15.5px;color:var(--ink-soft)">其中 <span id="ix1"></span> 是第 <span id="ix2"></span> 個樣本在第 <span id="ix3"></span> 個主成分的分數、<span id="ix4"></span> 是該主成分的特徵值；Q 則是重建殘差的平方和 <span id="ix5"></span>。兩者各有 95%／99% 控制界限（T² 用 F 分布、Q 用 Jackson–Mudholkar 近似）。</p>
+<div class="callout"><span class="tag">一句話：</span>一個樣本可能 <b>T² 高但 Q 低</b>（極端但仍符合模型）、<b>Q 高但 T² 低</b>（有模型沒見過的訊號，像摻假），或<b>兩者都高</b>（最可疑）。只看其中一個會漏抓。</div>
+</section>
+
+<section id="run"><span class="kicker">怎麼執行 · How to run</span><h2>雲端 Colab（零安裝）或本機 Python</h2>
+<p class="lead">所有分析整理成一個 Jupyter notebook，含 Corn 與蜂蜜兩個案例、T² 信賴橢圓與 Q 影響圖。最推薦 <b>Google Colab</b>：只要瀏覽器就能跑，手機平板也行，<b>資料自動線上讀取、零安裝零下載</b>。</p>
+<div class="grid g2">
+  <div class="card"><h4>① 雲端執行（建議）</h4><p>點按鈕在 Colab 開啟 → 選「執行階段 ▸ 全部執行」。<code>numpy / pandas / scikit-learn / scipy / matplotlib</code> Colab 都已預裝。</p><div class="btnrow"><a href="https://colab.research.google.com/github/Tai-ShengYeh/chemometrics-teaching/blob/main/notebooks/02_outlier_detection.ipynb" target="_blank" rel="noopener"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" style="height:34px;border:0;border-radius:6px"></a></div></div>
+  <div class="card"><h4>② 本機執行</h4><p>下載 notebook 與資料，用自己的 Jupyter / VS Code 開。需先裝一次：<code>pip install numpy pandas scikit-learn scipy matplotlib</code>。</p><div class="btnrow"><a class="btn" href="notebooks/02_outlier_detection.ipynb" download>⬇ Notebook（.ipynb）</a><a class="btn" href="data/corn_m5.csv" download>⬇ Corn 資料</a></div></div>
+</div>
+</section>
+
+<section id="corn"><span class="kicker">案例一 · Corn NIR</span><h2>Corn：T² 與 Q 抓到的是不同樣本</h2>
+<p class="lead">Eigenvector <b>Corn</b> 是化學計量學的經典資料集：80 個玉米樣本，同一批用 3 台近紅外儀（m5 / mp5 / mp6）量測，波長 1100–2498 nm（700 點），附 moisture / oil / protein / starch。先用單一台 m5，做 SNV → PCA → 找離群。</p>
+<p><span class="badge">80 × 700</span><span class="badge">3 台儀器</span><span class="badge">Eigenvector 公開</span><span class="badge">SNV + PCA</span></p>
+<figure><img src="python/figures/outlier/corn_spectra.png" alt="Corn 原始 vs SNV 光譜"><figcaption>SNV 前處理：逐樣本標準化，去除散射造成的基線漂移，讓化學差異更突出。</figcaption></figure>
+
+<h3>Score plot + 95% T² 信賴橢圓</h3>
+<p>在 PC1–PC2 平面畫出 95% 信賴橢圓，<b>掉在橢圓外</b>的點就是 T² 方向的離群候選。顏色越亮 = T² 越大。</p>
+<figure><img src="python/figures/outlier/corn_scoreplot.png" alt="Corn score plot with Hotelling T2 ellipse"><figcaption>樣本 <b>68、75</b> 明顯衝出橢圓——在主成分方向上強度極端（高 leverage）。</figcaption></figure>
+
+<h3>影響圖（Influence plot）：一張圖看懂兩種離群</h3>
+<p>把每個樣本畫在 (T², Q) 平面，兩條虛線是 95% 界限，切成四象限。這是離群偵測<b>最重要的一張圖</b>。</p>
+<figure><img src="python/figures/outlier/corn_influence.png" alt="Corn influence plot T2 vs Q"><figcaption>右下（<b>68、75</b>）＝高 T² 低 Q：極端但符合模型。左上（<b>46、47、63、64、65</b>）＝高 Q 低 T²：模型沒見過的殘差。<b>兩組是不同樣本！</b></figcaption></figure>
+<table>
+<tr><th>象限</th><th>T²</th><th>Q</th><th>意義</th><th>Corn 例子</th></tr>
+<tr><td>右下</td><td>高</td><td>低</td><td>極端但仍符合模型（高 leverage）</td><td>68、75</td></tr>
+<tr><td>左上</td><td>低</td><td>高</td><td>模型外的新訊號（可疑：摻假／汙染／錯樣）</td><td>46、47、63–65</td></tr>
+<tr><td>右上</td><td>高</td><td>高</td><td>最可疑，通常直接剔除</td><td>—</td></tr>
+<tr><td>左下</td><td>低</td><td>低</td><td>正常樣本</td><td>其餘</td></tr>
+</table>
+
+<h3>為什麼樣本 75（高 T²）和樣本 46（高 Q）不一樣？</h3>
+<figure><img src="python/figures/outlier/corn_why.png" alt="high T2 vs high Q spectra comparison"><figcaption>左：高 T² 樣本的光譜「形狀對、幅度極端」。右：高 Q 樣本有一段模型<b>解釋不掉的殘差</b>——這正是 Q 在抓的東西。</figcaption></figure>
+</section>
+
+<section id="instrument"><span class="kicker">觀念延伸</span><h2>離群不一定是壞樣本：儀器差異</h2>
+<p class="lead">把同一批 80 樣本在 <b>3 台儀器</b> 的光譜疊起來（240 列）做 PCA，會看到三群分開。這不是樣本壞掉，而是<b>儀器／校正差異</b>造成的系統性離群——這正是 calibration transfer（校正轉移）要解決的問題。</p>
+<figure><img src="python/figures/outlier/corn_instrument.png" alt="instrument clusters before and after SNV"><figcaption>左：原始光譜三台儀器分很開。右：SNV 後三群明顯靠攏。前處理能吸收掉一部分儀器差異。</figcaption></figure>
+<div class="callout gold"><span class="tag">教學重點：</span>發現離群時，先問「這是壞樣本，還是可校正的系統性效應？」。直接刪點之前，先看它是 T² 型還是 Q 型、能不能用前處理修掉。</div>
+</section>
+
+<section id="honey"><span class="kicker">案例二 · 蜂蜜摻假</span><h2>蜂蜜摻假：摻糖漿 = 殘差空間離群</h2>
+<div class="callout coral"><span class="tag">⚠ 教學模擬資料：</span>本案例的蜂蜜光譜為<b>程式合成</b>，譜帶中心取自真實 NIR 文獻（水 O–H ~1450 / 1940 nm、糖 C–H/O–H overtone ~1200 / 1690 / 2100 nm），僅供教學示範<b>兩種離群與 one-class 觀念</b>，不可用於真實蜂蜜鑑別結論。真實資料請見文末參考文獻。</div>
+<p class="lead">作法是 <b>SIMCA / one-class</b> 思路：<b>只用純蜜樣本建 PCA 模型</b>，再把摻假樣本投影進來看 Q 殘差。摻假引入模型沒見過的糖漿訊號，所以 <b>Q 會隨摻假比例上升</b>——不需要事先知道摻了什麼，就能把它抓出來。</p>
+<figure><img src="python/figures/outlier/honey_spectra.png" alt="honey pure vs adulterated mean spectra"><figcaption>純蜜與不同摻假比例的平均光譜：摻糖漿改變了糖帶的相對強度。</figcaption></figure>
+<figure><img src="python/figures/outlier/honey_influence.png" alt="honey Q by adulteration level and influence plot"><figcaption>左：Q 隨摻假比例（10→20→40%）單調上升，越摻越多越好抓。右：影響圖，色越紅 = 摻越多；藍圈是 gross 離群（氣泡／高溫／汙染）。</figcaption></figure>
+<div class="callout"><span class="tag">兩個真實世界的教訓：</span>①用 <b>Q 殘差</b>就能偵測未知摻假物，不必事先知道摻什麼。②<b>低比例（10%）摻假</b>有不少樣本卡在界限附近、難以偵測——這是所有摻假偵測方法的共同限制，別誇大靈敏度。</div>
+</section>
+
+<section id="orange"><span class="kicker">Orange · 不用寫程式</span><h2>用 Orange Data Mining 拖一遍</h2>
+<p class="lead">不想寫 Python？Orange 是拖拉式工具。用 <b>PCA → Scatter Plot</b> 肉眼找 T² 離群，用 <b>Outliers widget</b> 自動標記。注意：<b>Q 殘差這一側 Orange 沒有內建</b>，要完整教兩種離群仍建議搭配 Python notebook。</p>
+<div class="grid g3">
+  <div class="card"><h4>① Corn 離群</h4><p>PCA→Scatter 找 T² 離群；Outliers widget 自動標記＋列清單。</p><div class="btnrow"><a class="btn" href="orange/corn_outlier.ows" download>⬇ .ows</a></div></div>
+  <div class="card"><h4>② 儀器離群</h4><p>三儀器合併 PCA，依 instrument 上色看系統性離群。</p><div class="btnrow"><a class="btn" href="orange/corn_instruments.ows" download>⬇ .ows</a></div></div>
+  <div class="card coral"><h4>③ 蜂蜜摻假</h4><p>依 label 上色，Outliers widget 標記摻假樣本。</p><div class="btnrow"><a class="btn coral" href="orange/honey_outlier.ows" download>⬇ .ows</a></div></div>
+</div>
+<pre class="flow"><code>File（corn_m5_orange.tab）
+→ PCA ──────▶ Scatter Plot（PC1×PC2，肉眼找 T² 離群）
+→ Outliers（Elliptic Envelope）
+   ├ Data ─────▶ Scatter Plot（color = Outlier）
+   └ Outliers ─▶ Data Table（列出是哪些 sample）</code></pre>
+<div class="btnrow"><a class="btn gold" href="https://github.com/Tai-ShengYeh/chemometrics-teaching/blob/main/orange/ORANGE_GUIDE.md" target="_blank" rel="noopener">📖 Orange 圖文教學（Part 8 離群偵測）</a><a class="btn" href="data/corn_m5_orange.tab" download>⬇ Corn .tab</a><a class="btn" href="data/honey_nir_orange.tab" download>⬇ 蜂蜜 .tab</a></div>
+<div class="callout coral"><span class="tag">注意：</span>Orange 是<b>桌面程式需先安裝</b>（<a href="https://orangedatamining.com/download" target="_blank" rel="noopener">下載</a>），<b>無法在 Colab 執行</b>。沒有電腦或安裝有困難，請用上面的 <a href="#run">Colab notebook</a>。</div>
+</section>
+
+<section id="quiz"><span class="kicker">形成性評量 · 看學習成效</span><h2>離群偵測測驗（10 題）</h2>
+<p class="lead">作答會即時批改並給解析。輸入學號後，你的作答與分數會記錄下來，老師可看全班學習成效（記錄於課程既有系統，沿用你在其他食品分析頁面的學號）。</p>
+<div class="btnrow" style="margin:6px 0 0"><button class="btn" id="loginBtn" style="border:none;cursor:pointer">🎓 輸入學號並記錄成績</button><span id="loginState" style="align-self:center;font-size:14.5px;color:var(--ink-soft)">尚未登入（作答仍可即時批改，只是不會上傳）</span></div>
+<div class="quiz" id="quizbox"></div>
+<div id="scorebar"><span>作答進度 <b id="prog">0 / 10</b></span><span>目前得分 <b id="score">0</b></span><button class="btn gold" id="submitBtn" style="margin-left:auto;border:none;cursor:pointer">送出成績</button></div>
+<p id="doneMsg" style="display:none" class="callout"><span class="tag">✓ 已送出：</span><span id="doneTxt"></span></p>
+</section>
+
+<section id="next"><span class="kicker">下一步 · 參考資源</span><h2>延伸與資料來源</h2>
+<ul style="font-size:17px;line-height:2">
+<li><b>Colab notebook：</b><a href="https://colab.research.google.com/github/Tai-ShengYeh/chemometrics-teaching/blob/main/notebooks/02_outlier_detection.ipynb" target="_blank" rel="noopener">02_outlier_detection.ipynb</a>（Corn + 蜂蜜完整程式）</li>
+<li><b>Corn 資料集原始出處：</b>Eigenvector Research — <a href="https://eigenvector.com/resources/data-sets/" target="_blank" rel="noopener">Data Sets</a>（NIR of Corn Samples for Standardization Benchmarking）</li>
+<li><b>Q 殘差界限：</b>Jackson &amp; Mudholkar (1979), <i>Technometrics</i> 21(3), 341–349.</li>
+<li><b>真實蜂蜜摻假 NIR：</b>Se et al. 及 MDPI <i>Foods</i> 2024, 13(19), 3062 等（本頁蜂蜜為教學模擬，非取自這些資料）。</li>
+<li><b>課程系列：</b><a href="./">NIR 化學計量學課程入口</a>｜<a href="beginner-tecator.html">入門 Tecator</a>｜<a href="intermediate-coffee-barley.html">中階 摻偽</a>｜<a href="advanced-data-fusion.html">進階 Data Fusion</a></li>
+</ul>
+<div class="btnrow"><a class="btn" href="./">回課程入口</a><a class="btn coral" href="intermediate-coffee-barley.html">中階：Coffee–Barley 摻偽 →</a></div>
+</section>
+</main>
+<footer><p><b>離群值偵測：Hotelling T² 與 Q 殘差</b></p><p>近紅外光譜 × 食品分析化學計量學 · Python + Orange Data Mining</p></footer>
+
+<script type="module" src="assess_firebase.js"></script>
+<script>
+// ---- KaTeX 公式 ----
+document.addEventListener('DOMContentLoaded',()=>{
+  if(window.hljs)hljs.highlightAll();
+  const K=(el,tex,d=false)=>{try{katex.render(tex,el,{displayMode:d})}catch(e){el.textContent=tex}};
+  const t2=document.getElementById('eq-t2'); if(t2){K(t2,'T^2_i=\\sum_{a=1}^{A}\\dfrac{t_{ia}^2}{\\lambda_a}\\qquad\\qquad Q_i=\\sum_{k}\\big(x_{ik}-\\hat{x}_{ik}\\big)^2',true);}
+  K(document.getElementById('ix1'),'t_{ia}');K(document.getElementById('ix2'),'i');K(document.getElementById('ix3'),'a');K(document.getElementById('ix4'),'\\lambda_a');K(document.getElementById('ix5'),'Q_i');
+});
+
+// ---- 測驗 ----
+const QUESTIONS=[
+ {id:'OL-01',topic:'T²定義',bloom:'理解',stem:'Hotelling <b>T²</b> 衡量的是樣本在哪個空間的離群程度？',opts:['主成分模型<b>內</b>（score space）的極端程度','主成分模型<b>外</b>（殘差）的偏離程度','原始波長的最大吸光值','樣本濃度與真值的差'],ans:0,exp:'T² 是把樣本在各主成分分數平方後、除以特徵值加總，衡量它在「模型內」離中心多遠（高 leverage）。模型外的偏離是 Q 殘差負責。'},
+ {id:'OL-02',topic:'Q定義',bloom:'理解',stem:'<b>Q 殘差（SPE）</b>大代表什麼？',opts:['樣本濃度很高','樣本在主成分方向上很極端','樣本帶有主成分模型<b>沒見過</b>的訊號','樣本剛好在群體中心'],ans:2,exp:'Q 是重建殘差平方和，衡量樣本偏離主成分超平面多遠。Q 高＝模型解釋不掉的新訊號，典型如摻假、汙染、拿錯樣。'},
+ {id:'OL-03',topic:'四象限',bloom:'應用',stem:'一個樣本 <b>T² 高、Q 低</b>，最可能是？',opts:['被摻假的樣本','形狀符合模型、但強度極端的<b>高 leverage</b> 樣本','量測完全正常的樣本','儀器完全故障'],ans:1,exp:'T² 高 Q 低＝落在主成分方向的邊緣但仍貼合超平面：形狀對、強度極端，是高 leverage 樣本（如 Corn 的 68、75），會像槓桿撬動模型。'},
+ {id:'OL-04',topic:'摻假',bloom:'應用',stem:'食品<b>摻假</b>樣本在影響圖上通常表現為？',opts:['高 Q（模型外）','低 Q、低 T²','只有 T² 高','完全偵測不到'],ans:0,exp:'摻假引入模型沒見過的成分訊號，屬於「模型外」偏離，所以 Q 殘差升高。這也是 one-class / SIMCA 偵測摻假的原理。'},
+ {id:'OL-05',topic:'影響圖判讀',bloom:'分析',stem:'Corn m5 影響圖中，樣本 <b>46、63、64、65</b> 落在左上（高 Q、低 T²）。最合理的下一步是？',opts:['直接當高 leverage 樣本保留','檢查這些樣本是否有異常譜段（汙染／基線／量測問題）','判定它們是模型中心的正常樣本','把主成分數 A 設為 0'],ans:1,exp:'高 Q 代表有模型解釋不掉的殘差，應回頭檢視這些樣本的原始光譜是否有異常段落（如汙染或基線問題），再決定是否剔除或重新前處理。'},
+ {id:'OL-06',topic:'前處理',bloom:'理解',stem:'把 Corn 三台儀器光譜一起 PCA 會分成三群。<b>SNV 前處理</b>的作用是？',opts:['讓三群分得更開','把三群<b>拉近</b>，減少儀器/散射造成的系統性差異','刪掉其中一台儀器的資料','把 Q 殘差變成 T²'],ans:1,exp:'SNV 逐樣本標準化能吸收掉一部分散射與儀器差異，讓三群靠攏。這也是 calibration transfer 的動機之一。'},
+ {id:'OL-07',topic:'界限',bloom:'記憶',stem:'Q 殘差的 95% 控制界限常用哪個近似方法計算？',opts:['t 檢定','Jackson–Mudholkar 近似','線性內插','最大似然比'],ans:1,exp:'Q/SPE 的統計界限常用 Jackson & Mudholkar (1979) 基於殘差特徵值的近似式；T² 界限則用 F 分布。'},
+ {id:'OL-08',topic:'主成分數',bloom:'分析',stem:'把主成分數 <b>A 增加</b>（例如 5→8），對 Q 殘差的影響一般是？',opts:['Q 值普遍<b>下降</b>（更多變異被模型吸收）','Q 值一定上升','Q 與 A 完全無關','Q 會變成負值'],ans:0,exp:'A 越大，模型吸收的變異越多、重建殘差越小，Q 值普遍下降（Q 界限也隨之改變）。所以離群判定會受 A 影響——選 A 要謹慎。'},
+ {id:'OL-09',topic:'one-class',bloom:'應用',stem:'用 <b>SIMCA / one-class</b> 偵測蜂蜜摻假時，PCA 模型應該只用哪些樣本建立？',opts:['全部樣本（純蜜＋摻假）','只用<b>純蜜</b>（正常類別）樣本','只用摻假樣本','隨機一半樣本'],ans:1,exp:'One-class 建模只用「正常」類別（純蜜）建立模型，再看新樣本的 Q/T² 是否超界。摻假樣本沒參與建模，因此會以高 Q 被標出。'},
+ {id:'OL-10',topic:'限制',bloom:'評鑑',stem:'蜂蜜案例中，<b>10% 低比例摻假</b>只有部分樣本被 Q 標記。正確的解讀是？',opts:['方法完全無效','低比例摻假訊號弱、接近界限，<b>偵測較難</b>，需謹慎報告靈敏度','應該把界限調到 0 全部標記','10% 摻假一定 100% 偵測得到'],ans:1,exp:'摻假比例越低，光譜差異越小、Q 越接近界限，偵測率下降。這是所有摻假偵測的共同限制，報告時不應誇大靈敏度（如宣稱可測到極低比例）。'},
+];
+
+const quizEl=document.getElementById('quizbox');
+const state=QUESTIONS.map(()=>({picked:null,conf:null,done:false}));
+let fbReady=false, fbIniting=false;
+// 等 assess_firebase.js (type=module，deferred) 載入後再初始化，避免時序 race
+async function ensureFB(){
+  if(fbReady) return true;
+  if(fbIniting) return false;
+  fbIniting=true;
+  for(let i=0;i<120 && !window.AssessFB;i++) await new Promise(r=>setTimeout(r,50));
+  if(!window.AssessFB){ fbIniting=false; return false; }
+  try{ await window.AssessFB.init({chapter:'NIR-OUTLIER',game:'outlier_quiz'}); fbReady=true;
+       const sid=window.AssessFB.getStudentId&&window.AssessFB.getStudentId();
+       const ls=document.getElementById('loginState'); if(ls&&sid) ls.textContent='已登入：'+sid+'（作答會記錄）';
+  }catch(e){}
+  fbIniting=false; return fbReady;
+}
+document.getElementById('loginBtn').onclick=()=>ensureFB();
+
+QUESTIONS.forEach((q,qi)=>{
+  const d=document.createElement('div'); d.className='q';
+  d.innerHTML=`<p class="stem">${qi+1}. ${q.stem}</p>`;
+  q.opts.forEach((o,oi)=>{
+    const b=document.createElement('label'); b.className='opt'; b.innerHTML=o;
+    b.onclick=()=>pick(qi,oi,d); d.appendChild(b);
+  });
+  const cf=document.createElement('div'); cf.className='conf';
+  cf.innerHTML='<span>作答信心：</span>';
+  ['不確定','普通','很確定'].forEach((t,ci)=>{const bt=document.createElement('button');bt.textContent=t;bt.onclick=()=>{state[qi].conf=ci+1;cf.querySelectorAll('button').forEach(x=>x.classList.remove('on'));bt.classList.add('on');};cf.appendChild(bt);});
+  d.appendChild(cf);
+  const e=document.createElement('div'); e.className='exp'; e.id='exp'+qi; e.innerHTML='<b>解析：</b>'+q.exp; d.appendChild(e);
+  quizEl.appendChild(d);
+});
+
+function pick(qi,oi,d){
+  if(state[qi].done) return;
+  const q=QUESTIONS[qi]; state[qi].picked=oi; state[qi].done=true;
+  const opts=d.querySelectorAll('.opt');
+  opts.forEach((el,i)=>{el.style.pointerEvents='none';if(i===q.ans)el.classList.add('correct');if(i===oi&&oi!==q.ans)el.classList.add('wrong');});
+  document.getElementById('exp'+qi).classList.add('show');
+  const ok=oi===q.ans;
+  updateBar();
+  ensureFB().then(r=>{ if(r) window.AssessFB.log({event_type:'answer',question_id:q.id,is_correct:ok,qtype:'mcq',bloom:q.bloom,topic:q.topic,confidence:state[qi].conf,chapter:'NIR-OUTLIER'}); });
+}
+function updateBar(){
+  const done=state.filter(s=>s.done).length;
+  const score=state.filter((s,i)=>s.done&&s.picked===QUESTIONS[i].ans).length;
+  document.getElementById('prog').textContent=done+' / '+QUESTIONS.length;
+  document.getElementById('score').textContent=score;
+}
+document.getElementById('submitBtn').onclick=async()=>{
+  const done=state.filter(s=>s.done).length;
+  const score=state.filter((s,i)=>s.done&&s.picked===QUESTIONS[i].ans).length;
+  if(done<QUESTIONS.length && !confirm('還有題目沒作答，確定要送出嗎？')) return;
+  const ok=await ensureFB();
+  if(ok){ window.AssessFB.log({event_type:'attempt_complete',final_score:score,total:QUESTIONS.length,chapter:'NIR-OUTLIER'}); }
+  const msg=document.getElementById('doneMsg'); msg.style.display='block';
+  document.getElementById('doneTxt').textContent=`得分 ${score} / ${QUESTIONS.length}。`+(ok?'成績已記錄，老師可在課程系統查看。':'（未登入學號，成績未上傳；按「輸入學號並記錄成績」即可。）');
+  msg.scrollIntoView({behavior:'smooth'});
+};
+</script>
+</body></html>

@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Corn NIR — 離群偵測 (PCA + Outliers)" description="用 Eigenvector Corn m5 示範離群偵測。載入 data/corn_m5_orange.tab。上路：PCA → Scatter Plot 在 PC1×PC2 平面用肉眼找 score-space (T²) 離群。下路：Outliers widget (Elliptic Envelope / LOF) 自動標記離群，接 Scatter Plot 用 Outlier 欄位上色。全用 Orange 內建 widget，免 add-on。（SNV 前處理需 Spectroscopy add-on 的 Preprocess Spectra，可選加在 File 之後。）">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — corn_m5_orange.tab" position="(90.0, 240.0)" />
+		<node id="1" name="PCA" qualified_name="Orange.widgets.unsupervised.owpca.OWPCA" project_name="Orange3" version="" title="PCA" position="(300.0, 150.0)" />
+		<node id="2" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="Score Plot — PC1 vs PC2（找 T² 離群）" position="(540.0, 120.0)" />
+		<node id="3" name="Outliers" qualified_name="Orange.widgets.data.owoutliers.OWOutliers" project_name="Orange3" version="" title="Outliers（Elliptic Envelope）" position="(300.0, 340.0)" />
+		<node id="4" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="標記離群（color = Outlier）" position="(540.0, 340.0)" />
+		<node id="5" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="離群清單" position="(540.0, 470.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="1" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="0" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="3" source_node_id="3" sink_node_id="4" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="4" source_node_id="3" sink_node_id="5" source_channel="Outliers" sink_channel="Data" enabled="true" source_channel_id="outliers" sink_channel_id="data" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 20.0, 560.0, 92.0)" font-family="Helvetica" font-size="13">離群偵測有兩條路：
+① PCA → Scatter Plot：在 PC1×PC2 用肉眼找掉在群外的樣本（≈ Hotelling T² 高）。
+② Outliers widget：自動標記（Elliptic Envelope 對應 T²/馬氏距離；LOF 對應密度）。
+Python notebook 另外算 Q 殘差（模型外離群），Orange 內建沒有 Q，故兩者互補。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties />
+</scheme>

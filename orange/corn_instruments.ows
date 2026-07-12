@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Corn NIR — 儀器離群 (3 台儀器)" description="示範『系統性離群』：同一批 80 樣本在 3 台近紅外儀 (m5/mp5/mp6) 的光譜。載入 data/corn_3instruments_orange.tab（instrument 已是 class）。PCA → Scatter Plot 依 instrument 上色，可見三群分開——不是壞樣本，而是儀器/校正差異（calibration transfer 的動機）。免 add-on。">
+	<nodes>
+		<node id="0" name="File" qualified_name="Orange.widgets.data.owfile.OWFile" project_name="Orange3" version="" title="File — corn_3instruments_orange.tab" position="(100.0, 220.0)" />
+		<node id="1" name="PCA" qualified_name="Orange.widgets.unsupervised.owpca.OWPCA" project_name="Orange3" version="" title="PCA" position="(330.0, 220.0)" />
+		<node id="2" name="Scatter Plot" qualified_name="Orange.widgets.visualize.owscatterplot.OWScatterPlot" project_name="Orange3" version="" title="Score Plot（color = instrument）" position="(560.0, 160.0)" />
+		<node id="3" name="Data Table" qualified_name="Orange.widgets.data.owtable.OWTable" project_name="Orange3" version="" title="Data Table" position="(330.0, 360.0)" />
+	</nodes>
+	<links>
+		<link id="0" source_node_id="0" sink_node_id="1" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="1" source_node_id="1" sink_node_id="2" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+		<link id="2" source_node_id="0" sink_node_id="3" source_channel="Data" sink_channel="Data" enabled="true" source_channel_id="data" sink_channel_id="data" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(40.0, 20.0, 540.0, 78.0)" font-family="Helvetica" font-size="13">在 Scatter Plot 把 Color 設成 instrument。三群分很開 = 系統性離群（儀器差異）。
+延伸：在 File 後加 Spectroscopy add-on 的 Preprocess Spectra（SNV），三群會靠攏。</text>
+	</annotations>
+	<thumbnail />
+	<node_properties />
+</scheme>

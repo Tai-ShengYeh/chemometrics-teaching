@@ -144,3 +144,38 @@
 | `sugar_plsda.ows` | File → Test and Score ← Logistic Regression / SVM / Random Forest（交叉驗證）→ Confusion Matrix | Orange **沒有內建 PLS-DA widget**（PLS widget 只做迴歸）。此檔用分類器做等效的監督式分類；要真正的 **PLS-DA** 請用 Python notebook |
 
 > 為什麼 PLS 範例用 Tecator、分類範例用糖？因為 Orange 的 PLS widget 是**迴歸**（連續目標，如 Tecator 的 fat）；糖是**類別**目標，適合分類器或 Python 的 PLS-DA。
+
+---
+
+## Part 8 ｜ 離群值偵測（Outlier Detection）
+
+用 **Corn** 與 **蜂蜜（教學模擬）** 示範怎麼在 Orange 找離群樣本。核心觀念：離群有兩種——
+**score-space（Hotelling $T^2$，模型內、leverage 高）** 與 **residual-space（Q 殘差 / SPE，模型外、有沒見過的訊號）**。
+Orange 內建可以做 $T^2$ 那一側（PCA 散布圖 + Outliers widget），**Q 殘差這側 Orange 沒有內建**，請搭配 Python notebook。
+
+### 三個工作流程
+
+| 檔案 | 資料 | 做什麼 |
+|------|------|--------|
+| `corn_outlier.ows` | `../data/corn_m5_orange.tab` | ① PCA → Scatter Plot（PC1×PC2 肉眼找 $T^2$ 離群）；② **Outliers** widget（Elliptic Envelope）自動標記 → Scatter Plot 上色 + Data Table 列離群清單 |
+| `corn_instruments.ows` | `../data/corn_3instruments_orange.tab` | PCA → Scatter Plot 依 `instrument` 上色，看**儀器差異造成的系統性離群**（三群分開） |
+| `honey_outlier.ows` | `../data/honey_nir_orange.tab` | PCA → Scatter Plot 依 `label`(pure/adulterated) 上色；Outliers widget 標記摻假樣本 |
+
+### 操作重點
+
+1. **Outliers widget 在哪**：`Data ▸ Outliers`。方法選 **Elliptic Envelope**（≈ 馬氏距離／$T^2$）或 **Local Outlier Factor**（密度）。`Contamination` 參數 = 你預期的離群比例（例如 0.05）。
+2. **看結果**：Outliers 有兩個輸出——`Data`（多一個 `Outlier` 欄位，可在 Scatter Plot 當 Color）與 `Outliers`（只有被判離群的那幾列，接 Data Table 看是哪些 sample）。
+3. **對照 Python**：Corn m5 用 Python（SNV+PCA, A=5）算出 **高 $T^2$：樣本 54, 55, 68, 75, 77**；**高 Q：樣本 9, 46, 47, 62–65**。Orange 的 Elliptic Envelope 抓到的通常接近「高 $T^2$」那組。
+4. **SNV 前處理（可選）**：裝 Spectroscopy add-on 後，在 File 後加 **Preprocess Spectra ▸ Standard Normal Variate**，再接 PCA/Outliers，結果更穩定。
+
+### Orange vs Python 能做到哪
+
+| 能力 | Orange 內建 | Python notebook |
+|------|:---:|:---:|
+| PCA score plot 找 $T^2$ 離群 | ✅ | ✅ |
+| Hotelling $T^2$ 信賴橢圓（數值界限） | ⚠️ 用 Outliers 近似 | ✅ |
+| **Q 殘差 / SPE**（模型外離群） | ❌ | ✅ |
+| $T^2$–Q 影響圖 | ❌ | ✅ |
+| SIMCA / one-class（蜂蜜摻假隨比例上升） | ⚠️ 近似 | ✅ |
+
+> 想完整教「$T^2$ 與 Q 是兩回事」與「摻假 = Q 離群」，請用 Python notebook `02_outlier_detection.ipynb`；Orange 適合先用散布圖建立直覺、零程式入門。
