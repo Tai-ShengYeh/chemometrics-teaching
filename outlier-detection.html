@@ -25,11 +25,12 @@ pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;
 .quiz{background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:8px 22px 22px}.q{padding:18px 0;border-bottom:1px solid var(--line)}.q:last-child{border-bottom:none}.q .stem{font-weight:700;margin:0 0 12px}.q .stem b{color:var(--coral)}.opt{display:block;background:var(--paper);border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;margin:8px 0;cursor:pointer;transition:.12s;font-size:16.5px}.opt:hover{border-color:var(--teal)}.opt.sel{border-color:var(--teal);background:#e4f3f2}.opt.correct{border-color:#1a9c5b;background:#e2f6ea}.opt.wrong{border-color:#d64545;background:#fbe4e4}.exp{display:none;margin:10px 0 0;padding:12px 15px;border-radius:10px;background:#fff8e7;border-left:5px solid var(--gold);font-size:15.5px}.exp.show{display:block}
 .conf{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink-soft);margin:6px 0 0}.conf button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 11px;cursor:pointer;font-family:inherit}.conf button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
 #scorebar{position:sticky;bottom:0;background:var(--ink);color:#fff;border-radius:14px;padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:18px}#scorebar b{color:var(--gold);font-size:22px}
+.refs h3{font-size:19px;margin:26px 0 6px}.refs ol{margin:0 0 6px;padding-left:0;list-style:none;counter-reset:ref}.refs li{position:relative;padding:9px 0 9px 40px;border-bottom:1px dotted var(--line);font-size:15.5px;line-height:1.55;counter-increment:ref}.refs li:before{content:counter(ref);position:absolute;left:0;top:9px;width:26px;height:26px;background:var(--teal);color:#fff;border-radius:8px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center}.refs li i{color:var(--ink-soft)}.refs li .doi{display:inline-block;margin-left:4px;font-family:'JetBrains Mono',monospace;font-size:12.5px;background:#e4f3f2;color:var(--teal);border:1px solid #c8e3df;border-radius:6px;padding:1px 7px}.refs .keytag{display:inline-block;background:var(--gold);color:#1a1a1a;border-radius:6px;font-size:11.5px;font-weight:900;padding:1px 7px;margin-left:6px;vertical-align:middle}
 @media(max-width:760px){.g3,.g2,.two{grid-template-columns:1fr} body{font-size:17px} nav .brand{width:100%}}
 </style>
 </head>
 <body>
-<nav><span class="brand">NIR × 食品分析 <b>·</b> 離群值偵測</span><a href="./">課程入口</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a><a href="#quiz">測驗</a></nav>
+<nav><span class="brand">NIR × 食品分析 <b>·</b> 離群值偵測</span><a href="./">課程入口</a><a href="beginner-tecator.html">入門</a><a href="intermediate-coffee-barley.html">中階</a><a href="advanced-data-fusion.html">進階</a><a href="#quiz">測驗</a><a href="#refs">參考文獻</a></nav>
 <header class="hero">
   <h1>離群值偵測：<span class="accent">Hotelling T²</span> 與 Q 殘差</h1>
   <p class="sub">在近紅外光譜裡找出「怪怪的樣本」——是儀器出錯、樣本異常，還是食品被摻假？用兩個資料集學會分辨兩種完全不同的離群。</p>
@@ -118,12 +119,43 @@ pre{background:#1f2329;border-radius:14px;padding:0;margin:18px 0;overflow:auto;
 <p id="doneMsg" style="display:none" class="callout"><span class="tag">✓ 已送出：</span><span id="doneTxt"></span></p>
 </section>
 
+<section id="refs" class="refs"><span class="kicker">學術參考文獻 · References</span><h2>離群偵測的原始文獻</h2>
+<p class="lead">本頁用到的 Hotelling T²、Q 殘差（SPE）界限、T²–Q 影響圖與 one-class 摻假偵測，都有明確的原始出處。以下依主題整理，點 DOI 可連到原文。</p>
+
+<h3>① PCA 基礎與主成分空間距離</h3>
+<ol>
+<li>Bro, R., &amp; Smilde, A. K. (2014). Principal component analysis. <i>Analytical Methods</i>, 6(9), 2812–2831. <a class="doi" href="https://doi.org/10.1039/C3AY41907J" target="_blank" rel="noopener">10.1039/C3AY41907J</a> <span class="keytag">易讀入門</span></li>
+<li>De Maesschalck, R., Jouan-Rimbaud, D., &amp; Massart, D. L. (2000). The Mahalanobis distance. <i>Chemometrics and Intelligent Laboratory Systems</i>, 50(1), 1–18. <a class="doi" href="https://doi.org/10.1016/S0169-7439(99)00047-7" target="_blank" rel="noopener">10.1016/S0169-7439(99)00047-7</a> <span class="keytag">T²＝score 空間馬氏距離</span></li>
+</ol>
+
+<h3>② Hotelling T² 與 Q 殘差 / SPE 控制界限</h3>
+<ol>
+<li>Hotelling, H. (1931). The generalization of Student's ratio. <i>The Annals of Mathematical Statistics</i>, 2(3), 360–378. <a class="doi" href="https://doi.org/10.1214/aoms/1177732979" target="_blank" rel="noopener">10.1214/aoms/1177732979</a> <span class="keytag">T² 起源</span></li>
+<li>Jackson, J. E., &amp; Mudholkar, G. S. (1979). Control procedures for residuals associated with principal component analysis. <i>Technometrics</i>, 21(3), 341–349. <a class="doi" href="https://doi.org/10.1080/00401706.1979.10489679" target="_blank" rel="noopener">10.1080/00401706.1979.10489679</a> <span class="keytag">Q/SPE 界限（本頁採用）</span></li>
+<li>Nomikos, P., &amp; MacGregor, J. F. (1995). Multivariate SPC charts for monitoring batch processes. <i>Technometrics</i>, 37(1), 41–59. <a class="doi" href="https://doi.org/10.1080/00401706.1995.10485888" target="_blank" rel="noopener">10.1080/00401706.1995.10485888</a> <span class="keytag">T² 與 SPE 管制圖</span></li>
+</ol>
+
+<h3>③ 影響圖（Influence / diagnostic plot）與穩健離群偵測</h3>
+<ol>
+<li>Wise, B. M., &amp; Gallagher, N. B. (1996). The process chemometrics approach to process monitoring and fault detection. <i>Journal of Process Control</i>, 6(6), 329–348. <a class="doi" href="https://doi.org/10.1016/0959-1524(96)00009-1" target="_blank" rel="noopener">10.1016/0959-1524(96)00009-1</a> <span class="keytag">Q vs T² 影響圖（與 Corn 同源 Eigenvector）</span></li>
+<li>Hubert, M., Rousseeuw, P. J., &amp; Vanden Branden, K. (2005). ROBPCA: a new approach to robust principal component analysis. <i>Technometrics</i>, 47(1), 64–79. <a class="doi" href="https://doi.org/10.1198/004017004000000563" target="_blank" rel="noopener">10.1198/004017004000000563</a> <span class="keytag">穩健 PCA · outlier map</span></li>
+</ol>
+
+<h3>④ One-class / SIMCA 與食品真偽（摻假）</h3>
+<ol>
+<li>Wold, S. (1976). Pattern recognition by means of disjoint principal components models. <i>Pattern Recognition</i>, 8(3), 127–139. <a class="doi" href="https://doi.org/10.1016/0031-3203(76)90014-5" target="_blank" rel="noopener">10.1016/0031-3203(76)90014-5</a> <span class="keytag">SIMCA 原始</span></li>
+<li>Rodionova, O. Ye., Titova, A. V., &amp; Pomerantsev, A. L. (2016). Discriminant analysis is an inappropriate method of authentication. <i>TrAC Trends in Analytical Chemistry</i>, 78, 17–22. <a class="doi" href="https://doi.org/10.1016/j.trac.2016.01.010" target="_blank" rel="noopener">10.1016/j.trac.2016.01.010</a> <span class="keytag">真偽要用 one-class</span></li>
+<li>Oliveri, P. (2017). Class-modelling in food analytical chemistry: Development, sampling, optimisation and validation issues — A tutorial. <i>Analytica Chimica Acta</i>, 982, 9–19. <a class="doi" href="https://doi.org/10.1016/j.aca.2017.05.013" target="_blank" rel="noopener">10.1016/j.aca.2017.05.013</a> <span class="keytag">食品 class-modelling tutorial</span></li>
+</ol>
+<div class="callout"><span class="tag">怎麼引用本頁方法：</span>T² 信賴橢圓與界限見 <b>Hotelling (1931)</b>、<b>Nomikos &amp; MacGregor (1995)</b>；Q 殘差界限用 <b>Jackson &amp; Mudholkar (1979)</b> 的近似式；T²–Q 影響圖見 <b>Wise &amp; Gallagher (1996)</b>；穩健版 outlier map 見 <b>Hubert et al. (2005)</b>；蜂蜜摻假的 one-class 觀念見 <b>Oliveri (2017)</b> 與 <b>Rodionova et al. (2016)</b>。</div>
+</section>
+
 <section id="next"><span class="kicker">下一步 · 參考資源</span><h2>延伸與資料來源</h2>
 <ul style="font-size:17px;line-height:2">
 <li><b>Colab notebook：</b><a href="https://colab.research.google.com/github/Tai-ShengYeh/chemometrics-teaching/blob/main/notebooks/02_outlier_detection.ipynb" target="_blank" rel="noopener">02_outlier_detection.ipynb</a>（Corn + 蜂蜜完整程式）</li>
 <li><b>Corn 資料集原始出處：</b>Eigenvector Research — <a href="https://eigenvector.com/resources/data-sets/" target="_blank" rel="noopener">Data Sets</a>（NIR of Corn Samples for Standardization Benchmarking）</li>
-<li><b>Q 殘差界限：</b>Jackson &amp; Mudholkar (1979), <i>Technometrics</i> 21(3), 341–349.</li>
-<li><b>真實蜂蜜摻假 NIR：</b>Se et al. 及 MDPI <i>Foods</i> 2024, 13(19), 3062 等（本頁蜂蜜為教學模擬，非取自這些資料）。</li>
+<li><b>方法原始文獻：</b>見上方 <a href="#refs">學術參考文獻</a>（T²、Q/SPE 界限、影響圖、one-class 摻假偵測，皆附 DOI）。</li>
+<li><b>真實蜂蜜摻假 NIR：</b>MDPI <i>Foods</i> 2024, 13(19), 3062 等（本頁蜂蜜為教學模擬，非取自這些資料）。</li>
 <li><b>課程系列：</b><a href="./">NIR 化學計量學課程入口</a>｜<a href="beginner-tecator.html">入門 Tecator</a>｜<a href="intermediate-coffee-barley.html">中階 摻偽</a>｜<a href="advanced-data-fusion.html">進階 Data Fusion</a></li>
 </ul>
 <div class="btnrow"><a class="btn" href="./">回課程入口</a><a class="btn coral" href="intermediate-coffee-barley.html">中階：Coffee–Barley 摻偽 →</a></div>
